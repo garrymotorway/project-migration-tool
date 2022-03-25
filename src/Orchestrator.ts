@@ -11,7 +11,7 @@ export default class Orchestrator {
     private consumer: Consumer;
     private producer: Producer;
 
-    constructor(private consumerName: string, private producerName: string) {
+    constructor(consumerName: string, producerName: string) {
         this.mapper = MapperFactory.create(consumerName, producerName);
         this.consumer = ConsumerFactory.create(consumerName);
         this.producer = ProducerFactory.create(producerName);
