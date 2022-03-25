@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "outDir": "dist",
+        "paths": {
+        }
+    },
+    "include": [
+        "./**/*.ts",
+        "./**/*.js"
+      ],
+    "exclude": [
+        "node_modules",
+        "**/__tests__/*",
+        "**/__mocks__/*",
+        "test"
+      ]
+}
