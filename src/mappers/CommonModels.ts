@@ -19,6 +19,7 @@ export interface CommonStoryModelItem {
   status: string | number;
   type: string;
   title: string;
+  description: string;
   comments: CommonCommentsModelItem[];
   updated: string;
   created: string;

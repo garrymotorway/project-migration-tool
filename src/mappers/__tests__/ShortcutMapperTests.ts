@@ -11,10 +11,6 @@ const data: any = {
 
 const mappedData = ShortcutMapper.from(data);
 
-test('Maps external ID', () => {
-  expect(mappedData.stories[0].externalId).toEqual(data.stories[0].external_id);
-});
-
 test('Maps project name', () => {
   expect(mappedData.project.name).toEqual(data.group.name);
 });
@@ -24,7 +20,7 @@ test('Maps project description', () => {
 });
 
 test('Maps story external Id', () => {
-  expect(mappedData.stories[0].externalId).toEqual(data.stories[0].external_id);
+  expect(mappedData.stories[0].externalId).toEqual(data.stories[0].id);
 });
 
 test('Maps story updated at timestamp', () => {
@@ -41,6 +37,14 @@ test('Maps story reporter', () => {
 
 test('Maps story type', () => {
   expect(mappedData.stories[0].type).toEqual('chore');
+});
+
+test('Maps story title', () => {
+  expect(mappedData.stories[0].title).toEqual(data.stories[0].name);
+});
+
+test('Maps story description', () => {
+  expect(mappedData.stories[0].description).toEqual(data.stories[0].description);
 });
 
 test('Maps status', () => {

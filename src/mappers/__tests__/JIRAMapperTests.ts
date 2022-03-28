@@ -6,6 +6,7 @@ const data: CommonStoryModel = {
     externalId: '123',
     status: 'Done',
     title: 'Some title',
+    description: 'A description',
     comments: [
       {
         body: 'hello',
@@ -44,6 +45,10 @@ test('Maps project description', () => {
 
 test('Maps story title to issue title', () => {
   expect(mappedData.projects[0].issues[0].summary).toEqual(data.stories[0].title);
+});
+
+test('Maps story description to issue description', () => {
+  expect(mappedData.projects[0].issues[0].description).toEqual(data.stories[0].description);
 });
 
 test('Maps story external ID to issue external ID', () => {

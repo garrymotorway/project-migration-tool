@@ -10,7 +10,8 @@ export default class {
   static from(data: any): CommonStoryModel {
     return {
       stories: data.stories.map((item: any) => ({
-        externalId: item.external_id,
+        externalId: item.id,
+        // externalId: item.external_id,
         updated: item.updated_at,
         created: item.created_at,
         reporter: getMemberNameById(data.members, item.requested_by_id),
@@ -21,6 +22,8 @@ export default class {
         })),
         type: item.story_type,
         status: item.workflow_state_id,
+        title: item.name,
+        description: item.description,
       })),
       project: {
         name: data.group.name,
