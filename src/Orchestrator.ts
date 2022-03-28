@@ -2,9 +2,9 @@ import Consumer from '@consumers/Consumer';
 import Producer from '@producers/Producer';
 import Mapper from '@mappers/Mapper';
 
-const ConsumerFactory = require('@consumers/ConsumerFactory');
-const ProducerFactory = require('@producers/ProducerFactory');
-const MapperFactory = require('@mappers/MapperFactory');
+import ConsumerFactory from '@consumers/ConsumerFactory';
+import ProducerFactory from '@producers/ProducerFactory';
+import MapperFactory from '@mappers/MapperFactory';
 
 export default class Orchestrator {
   private mapper: Mapper<any, any>;
@@ -21,7 +21,8 @@ export default class Orchestrator {
 
   async run() {
     const data = await this.consumer.consume();
-    const mapped = this.mapper.map(data);
-    await this.producer.produce(mapped);
+    const mappedFromSource = this.mapper.from(data);
+    const mappedToDest = this.mapper.to(mappedFromSource);
+    await this.producer.produce(mappedToDest);
   }
 }

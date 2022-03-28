@@ -1,8 +1,8 @@
 {
     "compilerOptions": {
-        "module": "ES2020",
-        "target": "ES2020",
-        "lib": ["ES2020"],
+        "module": "commonjs",
+        "target": "ES2021",
+        "lib": ["ES2021"],
         "esModuleInterop": true,
         "strict": true,
         "outDir": "dist",
@@ -19,12 +19,14 @@
     },
     "include": [
         "./**/*.ts",
-        "./**/*.js"
+        "./**/*.mts",
+        "./**/*.js",
+        "./**/*.mjs"
 , "test/setupTests"      ],
     "exclude": [
         "node_modules",
         "**/__tests__/*",
         "**/__mocks__/*",
-        "test"
+        "*test*"
       ]
 }

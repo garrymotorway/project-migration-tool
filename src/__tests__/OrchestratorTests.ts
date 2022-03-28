@@ -4,31 +4,31 @@ const { SHORTCUT, JIRA } = require('@enums/ProjectManagementSystems');
 
 const consume = jest.fn(() => 1);
 const produce = jest.fn();
-const map = jest.fn(() => 1);
+const from = jest.fn(() => 1);
+const to = jest.fn(() => 1);
 
 jest.mock('@consumers/ConsumerFactory', () => ({ create: () => ({ consume }) }));
-jest.mock('@mappers/MapperFactory', () => ({ create: () => ({ map }) }));
+jest.mock('@mappers/MapperFactory', () => ({ create: () => ({ from, to }) }));
 jest.mock('@producers/ProducerFactory', () => ({ create: () => ({ produce }) }));
 
-describe('OrchestratorTests', () => {
-  let orchestrator: Orchestrator;
+const orchestrator: Orchestrator = new Orchestrator(SHORTCUT, JIRA);
 
-  beforeEach(() => {
-    orchestrator = new Orchestrator(SHORTCUT, JIRA);
-  });
+test('run -> consumes data from the source system', () => {
+  orchestrator.run();
+  expect(consume).toHaveBeenCalled();
+});
 
-  it('run -> consumes data from the source system', () => {
-    orchestrator.run();
-    expect(consume).toHaveBeenCalled();
-  });
+test('run -> maps data from the source system', () => {
+  orchestrator.run();
+  expect(from).toHaveBeenCalled();
+});
 
-  it('run -> maps data from the source system to a format understood by the destination system', () => {
-    orchestrator.run();
-    expect(map).toHaveBeenCalled();
-  });
+test('run -> maps data to a format understood by the destination system', () => {
+  orchestrator.run();
+  expect(to).toHaveBeenCalled();
+});
 
-  it('run -> produces data to the destination system', () => {
-    orchestrator.run();
-    expect(produce).toHaveBeenCalled();
-  });
+test('run -> produces data to the destination system', () => {
+  orchestrator.run();
+  expect(produce).toHaveBeenCalled();
 });

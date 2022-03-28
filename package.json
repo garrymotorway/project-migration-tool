@@ -4,9 +4,9 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "test": "jest",
+    "test": "CONSUMER_BOARD_ID=CON123 PRODUCER_BOARD_ID=HOTT jest",
     "build": "rm -rf dist && tsc",
-    "start": "npm run build && node ./dist/run-test.js",
+    "start": "npm run build && node ./run-test.js",
     "lint": "eslint ."
   },
   "repository": {
@@ -44,5 +44,8 @@
     "@producers": "dist/producers",
     "@mappers": "dist/mappers",
     "@enums": "dist/enums"
+  },
+  "engines": {
+    "node": "^16.1.4"
   }
 }

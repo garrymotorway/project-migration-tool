@@ -1,0 +1,29 @@
+{
+	"app_url": "https:\/\/app.shortcut.com\/motorway\/team\/BAD8D4B8-9396-4777-9FAD-10F2ABBE4CB2",
+	"description": "",
+	"archived": false,
+	"entity_type": "group",
+	"color": null,
+	"num_stories_started": 13,
+	"mention_name": "my-squad",
+	"name": "Hot Wheels",
+	"color_key": "turquoise",
+	"num_stories": 549,
+	"num_epics_started": 2,
+	"id": "BAD8D4B8-9396-4777-9FAD-10F2ABBE4CB2",
+	"display_icon": {
+		"entity_type": "org-icon",
+		"id": "11faafb1-1047-44c7-2653-3d140caff4a5",
+		"created_at": "2021-07-23T12:02:57Z",
+		"updated_at": "2021-07-23T12:02:57Z",
+		"url": "https:\/\/media.app.shortcut.com\/api\/attachments\/organization-icons\/blablabla.jpg"
+	},
+	"member_ids": [
+		"3999DD79-950D-465E-A81D-CFC66E1118C5"
+	],
+	"workflow_ids": [
+		100000005,
+		100001978,
+		100090970
+	]
+}

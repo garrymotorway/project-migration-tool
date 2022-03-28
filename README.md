@@ -14,6 +14,7 @@ import Orchestrator from "./Orchestrator";
 process.env.CONSUMER_TOKEN = "******";
 process.env.PRODUCER_TOKEN = "clientid:secret";
 process.env.CONSUMER_BOARD_ID = "<boardid>";
+process.env.PRODUCER_BOARD_ID = "<boardid>";
 
 (function() {
     new Orchestrator("shortcut", "jira").run();

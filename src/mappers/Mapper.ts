@@ -1,3 +1,4 @@
 export default interface Mapper<TSource, TDest> {
-  map(dataData: TSource): TDest;
+  from(dataData: TSource): TDest;
+  to(dataData: TDest): TSource;
 }

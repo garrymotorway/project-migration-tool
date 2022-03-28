@@ -1,7 +1,7 @@
 import Consumer from '@consumers/Consumer';
 import ShortcutConsumer from '@consumers/ShortcutConsumer';
 
-const { SHORTCUT } = require('@enums/ProjectManagementSystems');
+import { SHORTCUT } from '@enums/ProjectManagementSystems';
 
 export default class ConsumerFactory {
   static create(consumerName: string): Consumer {

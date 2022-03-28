@@ -34,5 +34,9 @@
     "*run-test*",
     "*eslintrc*",
     "test/**"
-  ]
+  ],
+  "rules": {
+    "max-len":"off",
+    "quote-props": "off"
+  }
 }
