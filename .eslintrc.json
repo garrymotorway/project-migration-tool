@@ -1,0 +1,38 @@
+{
+  "extends": [
+    "airbnb-base",
+    "airbnb-typescript/base",
+    "plugin:import/typescript"
+  ],
+  "settings": {
+    "import/resolver": {
+      "alias": {
+        "map": [
+          ["@", "."],
+          ["@consumers", "src/consumers"],
+          ["@producers", "src/producers"],
+          ["@mappers", "src/mappers"],
+          ["@enums", "src/enums"]
+        ],
+        "extensions": [".ts", ".js"]
+      },
+      "typescript": {
+        "alwaysTryTypes": true
+      }
+    }
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.eslint.json"
+  },
+  "plugins": [
+    "import",
+    "@typescript-eslint"
+  ],
+  "ignorePatterns": [
+    "dist/**",
+    "*run-test*",
+    "*eslintrc*",
+    "test/**"
+  ]
+}

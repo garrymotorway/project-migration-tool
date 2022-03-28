@@ -1,6 +1,7 @@
-const Orchestrator = require("./Orchestrator");
+import 'module-alias/register';
 
-module.exports = () => {
-    
-    const orchestrator = new Orchestrator();
-};
+import Orchestrator from '@/Orchestrator';
+
+export default function run(source: string, dest: string) {
+  new Orchestrator(source, dest).run();
+}

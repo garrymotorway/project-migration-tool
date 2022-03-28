@@ -1,3 +1,3 @@
 export default interface Consumer {
-    consume(): Promise<any>;
+  consume(): Promise<any>;
 }

@@ -1,3 +1,3 @@
 export default interface Producer {
-    produce(data: any): Promise<void>;
+  produce(data: any): Promise<void>;
 }

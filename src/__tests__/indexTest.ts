@@ -1,9 +1,11 @@
-import { idText } from "typescript"
+import Orchestrator from '@/Orchestrator';
+import run from '@/index';
 
-describe('index Tests', () => {
-    it('test test', () => {
-        const x = true;
-        const y = true;
-        expect(x).toEqual(y);
-    })
-})
+jest.mock('@/Orchestrator');
+
+describe('Index Tests', () => {
+  it('test test', () => {
+    run('src', 'dest');
+    expect(Orchestrator.prototype.run).toBeCalledTimes(1);
+  });
+});

@@ -1,7 +1,8 @@
-const ProducerFactory =  require("../ProducerFactory");
-import JIRAProducer from "../JIRAProducer";
-const { JIRA } = require("../../enums/ProjectManagementSystems");
+import ProducerFactory from '@producers/ProducerFactory';
+import JIRAProducer from '@producers/JIRAProducer';
 
-describe("ProducerFactoryTests", () => {
-    it("returns a JIRAProducer", () => expect(ProducerFactory.create(JIRA)).toBeInstanceOf(JIRAProducer));
+import { JIRA } from '@enums/ProjectManagementSystems';
+
+describe('ProducerFactoryTests', () => {
+  it('returns a JIRAProducer', () => expect(ProducerFactory.create(JIRA)).toBeInstanceOf(JIRAProducer));
 });
