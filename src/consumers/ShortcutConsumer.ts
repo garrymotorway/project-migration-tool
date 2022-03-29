@@ -25,7 +25,7 @@ export default class ShortcutConsumer implements Consumer {
         'Shortcut-Token': `${process.env.CONSUMER_TOKEN}`,
       },
     });
-    const groupStoriesPromises = groupStoriesResponse.data.slice(0, 10).map((item: any, storyIndex: number) => {
+    const groupStoriesPromises = groupStoriesResponse.data./* slice(0, 10). */map((item: any, storyIndex: number) => {
       const delayOffset = (storyIndex + 1) * SHORT_SLEEP_TIME_TO_AVOID_SPAMMING_SOURCE_API_MS;
       return sleep(delayOffset)
         .then(() => axios.get(`https://api.app.shortcut.com/api/v3/stories/${item.id}`, { headers: { 'Shortcut-Token': `${process.env.CONSUMER_TOKEN}` } }));

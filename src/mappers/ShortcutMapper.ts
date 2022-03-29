@@ -12,6 +12,10 @@ export function getStateNameFromId(workflows: any[], workflowId: number, workflo
   return thisState.name || workflowStateId;
 }
 
+function cleanText(text: string) {
+  return text?.replace(/\[@([^\]]+)\]\(([^\)]+)\)/ig, '@$1');
+}
+
 export class ShortcutMapper {
   static from(data: any): CommonStoryModel {
     return {
@@ -22,7 +26,7 @@ export class ShortcutMapper {
         created: item.created_at,
         reporter: getMemberEmailAddressById(data.members, item.requested_by_id),
         comments: item.comments.map((comment: any) => ({
-          body: comment.text,
+          body: cleanText(comment.text),
           author: getMemberEmailAddressById(data.members, comment.author_id),
           created: comment.created_at,
         })),
@@ -30,11 +34,21 @@ export class ShortcutMapper {
         // status: item.workflow_state_id,
         status: getStateNameFromId(data.workflows, item.workflow_id, item.workflow_state_id),
         title: item.name,
-        description: item.description,
+        description: cleanText(item.description),
+        estimate: item.estimate,
+        labels: item.labels?.map((label: any) => label.name),
+        tasks: item.tasks.map((task: any) => ({
+          id: task.id,
+          complete: task.complete,
+          created: task.created_at,
+          updated: task.updated_at,
+          reporter: getMemberEmailAddressById(data.members, task.requested_by_id),
+          description: task.description,
+        })),
       })),
       project: {
         name: data.group.name,
-        description: data.group.description,
+        description: cleanText(data.group.description),
       },
     };
   }

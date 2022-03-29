@@ -59,7 +59,7 @@
     "parent_id": 123,
     "position": 123,
     "story_id": 123,
-    "text": "foo",
+    "text": "foo [@john](http://ss..com) take a look",
     "updated_at": "2016-12-31T12:30:00Z"
   }],
   "commits": [{
@@ -92,7 +92,7 @@
   }],
   "cycle_time": 123,
   "deadline": "2016-12-31T12:30:00Z",
-  "description": "this is a description of my story",
+  "description": "this is a description of my story for [@garry](http://www.google.com) with screenshot ![Screenshot 2022-03-21 at 14.25.43.png](https://media.app.shortcut.com/api/attachments/files/clubhouse-assets/file.png).",
   "entity_type": "foo",
   "epic_id": 123,
   "estimate": 123,
@@ -132,7 +132,7 @@
     "entity_type": "foo",
     "external_id": "foo",
     "id": 123,
-    "name": "foo",
+    "name": "mvp",
     "updated_at": "2016-12-31T12:30:00Z"
   }],
   "lead_time": 123,
@@ -212,14 +212,14 @@
   "story_template_id": "12345678-9012-3456-7890-123456789012",
   "story_type": "chore",
   "tasks": [{
-    "complete": true,
+    "complete": false,
     "completed_at": "2016-12-31T12:30:00Z",
     "created_at": "2016-12-31T12:30:00Z",
     "description": "foo",
     "entity_type": "foo",
     "external_id": "foo",
     "group_mention_ids": ["12345678-9012-3456-7890-123456789012"],
-    "id": 123,
+    "id": 234,
     "member_mention_ids": ["12345678-9012-3456-7890-123456789012"],
     "mention_ids": ["12345678-9012-3456-7890-123456789012"],
     "owner_ids": ["12345678-9012-3456-7890-123456789012"],

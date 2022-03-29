@@ -14,6 +14,15 @@ export interface CommonCommentsModelItem {
   created: string;
 }
 
+export interface CommonTaskModelItem {
+  id?: string | number;
+  complete: boolean;
+  created: string;
+  updated: string;
+  reporter: string;
+  description: string;
+}
+
 export interface CommonStoryModelItem {
   externalId?: string | number;
   status: string | number;
@@ -21,7 +30,10 @@ export interface CommonStoryModelItem {
   title: string;
   description: string;
   comments: CommonCommentsModelItem[];
+  tasks: CommonTaskModelItem[];
   updated: string;
   created: string;
   reporter: string;
+  estimate: number;
+  labels: string[];
 }
