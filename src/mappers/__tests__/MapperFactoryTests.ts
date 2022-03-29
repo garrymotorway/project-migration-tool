@@ -1,5 +1,5 @@
 import MapperFactory from '@mappers/MapperFactory';
-import ShortcutMapper from '@mappers/ShortcutMapper';
+import { ShortcutMapper } from '@mappers/ShortcutMapper';
 import JIRAMapper from '@mappers/JIRAMapper';
 
 import { SHORTCUT, JIRA } from '@enums/ProjectManagementSystems';

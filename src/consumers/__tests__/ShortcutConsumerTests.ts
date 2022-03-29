@@ -33,6 +33,20 @@ jest.mock('axios');
     };
   }
 
+  if (url === 'https://api.app.shortcut.com/api/v3/workflows') {
+    return {
+      data: [{
+        id: 1000,
+        states: [
+          {
+            id: 50000000,
+            name: 'ToDo',
+          },
+        ],
+      }],
+    };
+  }
+
   if (/https:\/\/api.app.shortcut.com\/api\/v3\/stories/i.test(url)) {
     return { data: { id: url.slice(url.length - 1) } };
   }
@@ -43,7 +57,7 @@ const consumer: Consumer = new ShortcutConsumer();
 
 test('gets a list of stories from Shortcut', async () => {
   const dataFromShortcut = await consumer.consume();
-  expect(dataFromShortcut.stories).not.toBeUndefined();
+  expect(dataFromShortcut.stories).toBeDefined();
   expect(dataFromShortcut.stories.length).toEqual(3);
   expect(dataFromShortcut.stories[0].id).toEqual('1');
   expect(dataFromShortcut.stories[1].id).toEqual('2');
@@ -52,14 +66,24 @@ test('gets a list of stories from Shortcut', async () => {
 
 test('gets group data from Shortcut', async () => {
   const dataFromShortcut = await consumer.consume();
-  expect(dataFromShortcut.group).not.toBeUndefined();
+  expect(dataFromShortcut.group).toBeDefined();
   expect(dataFromShortcut.group.name).toEqual('Hot wheels');
 });
 
 test('gets members from Shortcut', async () => {
   const dataFromShortcut = await consumer.consume();
-  expect(dataFromShortcut.members).not.toBeUndefined();
+  expect(dataFromShortcut.members).toBeDefined();
   expect(dataFromShortcut.members.length).toEqual(2);
   expect(dataFromShortcut.members[0].profile.name).toEqual('Joe Bloggs');
   expect(dataFromShortcut.members[1].profile.name).toEqual('John Doe');
+});
+
+test('gets workflows from Shortcut', async () => {
+  const dataFromShortcut = await consumer.consume();
+  expect(dataFromShortcut.workflows).toBeDefined();
+  expect(dataFromShortcut.workflows).toHaveLength(1);
+  expect(dataFromShortcut.workflows[0].states).toBeDefined();
+  expect(dataFromShortcut.workflows[0].states).toHaveLength(1);
+  expect(dataFromShortcut.workflows[0].states[0].name).toEqual('ToDo');
+  expect(dataFromShortcut.workflows[0].states[0].id).toEqual(50000000);
 });

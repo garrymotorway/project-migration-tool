@@ -4,7 +4,7 @@ import { CommonStoryModel } from '@mappers/CommonModels';
 const data: CommonStoryModel = {
   stories: [{
     externalId: '123',
-    status: 'Done',
+    status: 'Has been mergeD',
     title: 'Some title',
     description: 'A description',
     comments: [
@@ -57,6 +57,10 @@ test('Maps story external ID to issue external ID', () => {
 
 test('Maps story reporter', () => {
   expect(mappedData.projects[0].issues[0].reporter).toEqual(data.stories[0].reporter);
+});
+
+test('Maps story status', () => {
+  expect(mappedData.projects[0].issues[0].status).toEqual('MERGED');
 });
 
 test('Maps comments', () => {

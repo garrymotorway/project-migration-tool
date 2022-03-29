@@ -27,14 +27,49 @@ const shortcutToJIRAStatuses: Record<string, string> = {
   500090978: 'Closed', // Done
   500090979: 'MERGED', // Merged
   500090976: 'SHIPPED', // Shipped
+
+  'Backlog': 'To Do', // Backlog
+  'Ready for Development': 'To Do', // Ready for development
+  'Blocked': 'BLOCKED', // Blocked
+  'In Development': 'In Progress', // In Development
+  'Code Review': 'PEER REVIEW', // Code Review
+  '.*QA.*': 'TESTING', // Product Review\/QA'
+  '.*Merged.*': 'MERGED', // "Ready To Ship\/Merged",
+  '.*Shipped.*': 'SHIPPED', // 500000011
+  'Ready to Start': 'To Do', // Ready to start
+  'In Progress': 'In Progress', // In Progress
+  'Peer Review': 'PEER REVIEW', // Peer Review
+  'Testing': 'TESTING', // Testing
+  'Done': 'Closed', // Done
 };
 
-function ensureAllStatusesCanBeMapped(stories: CommonStoryModelItem[]) {
-  const badStatuses: CommonStoryModelItem[] = stories.filter((story: CommonStoryModelItem) => !shortcutToJIRAStatuses[story.status]);
-  if (badStatuses.length) {
-    throw new Error(`Could not map the status(es) ${JSON.stringify(badStatuses)}`);
-  }
+interface MatchResult {
+  match: string | undefined;
+  nomatch: string | undefined;
 }
+
+const findSingleDestinationValueUsingRegexMatching = (map: any, searchFor: string): MatchResult => {
+  const match = Object.keys(map).find((key: string) => new RegExp(key, 'i').test(searchFor));
+  return {
+    match,
+    nomatch: match ? undefined : searchFor,
+  };
+};
+
+const checkMappingIsPossible = (matchResults: MatchResult[], errorMessageHandler: (t: string) => string) => {
+  const badItems: any[] = matchResults
+    .filter((typeMatchResult: MatchResult) => typeMatchResult.nomatch)
+    .map((typeMatchResult: MatchResult) => typeMatchResult.nomatch);
+  if (badItems.length) {
+    throw new Error(errorMessageHandler(JSON.stringify(badItems)));
+  }
+};
+
+const findAllDestinationValuesUsingRegexMatching = (stories: any[], map: Record<string, string>, storyItemKey: string): string[] => {
+  const storyTypeMatchResults: MatchResult[] = stories.map((story: any) => findSingleDestinationValueUsingRegexMatching(map, story[storyItemKey]));
+  checkMappingIsPossible(storyTypeMatchResults, (badTypes: string) => `Could not map the ${storyItemKey}(es) ${badTypes}`);
+  return storyTypeMatchResults.map((s: MatchResult) => map[s.match as string]);
+};
 
 export default class {
   static from(/* data: any */): CommonStoryModel {
@@ -42,7 +77,8 @@ export default class {
   }
 
   static to(data: CommonStoryModel): any | string {
-    ensureAllStatusesCanBeMapped(data.stories);
+    const storyStatuses = findAllDestinationValuesUsingRegexMatching(data.stories, shortcutToJIRAStatuses, 'status');
+    const storyTypes = findAllDestinationValuesUsingRegexMatching(data.stories, shortcutToJIRATypes, 'type');
 
     return {
       projects: [{
@@ -51,11 +87,10 @@ export default class {
         key: process.env.PRODUCER_BOARD_ID,
         description: data.project.description,
         type: 'software',
-        issues: data.stories.map((story: CommonStoryModelItem) => ({
-          status: shortcutToJIRAStatuses[story.status] || '?? UNKNOWN ??',
+        issues: data.stories.map((story: CommonStoryModelItem, storyIndex: number) => ({
+          status: storyStatuses[storyIndex],
           reporter: story.reporter,
-          // eslint-disable-next-line no-nested-ternary
-          issueType: shortcutToJIRATypes[story.type] || 'Story',
+          issueType: storyTypes[storyIndex],
           created: story.created,
           updated: story.updated,
           // resolution: 'Duplicate', // probably not required

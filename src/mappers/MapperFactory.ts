@@ -1,4 +1,4 @@
-import ShortcutMapper from '@/mappers/ShortcutMapper';
+import { ShortcutMapper } from '@/mappers/ShortcutMapper';
 import Mapper from '@mappers/Mapper';
 import { SHORTCUT, JIRA } from '@enums/ProjectManagementSystems';
 import JIRAMapper from './JIRAMapper';

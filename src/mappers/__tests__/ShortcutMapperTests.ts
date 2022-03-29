@@ -1,12 +1,15 @@
-import ShortcutMapper from '@mappers/ShortcutMapper';
+import { ShortcutMapper, getStateNameFromId } from '@mappers/ShortcutMapper';
+
 const shortcutGetStoryData = require('./data/shortcut-get-story.json');
 const shortcutGroupData = require('./data/shortcut-group.json');
 const shortcutMemberData = require('./data/shortcut-members.json');
+const workflowData = require('./data/workflow-data.json');
 
 const data: any = {
   stories: [shortcutGetStoryData],
   group: shortcutGroupData,
   members: shortcutMemberData,
+  workflows: workflowData,
 };
 
 const mappedData = ShortcutMapper.from(data);
@@ -32,7 +35,7 @@ test('Maps story created at timestamp', () => {
 });
 
 test('Maps story reporter', () => {
-  expect(mappedData.stories[0].reporter).toEqual(data.members[0].profile.name);
+  expect(mappedData.stories[0].reporter).toEqual(data.members[0].profile.email_address);
 });
 
 test('Maps story type', () => {
@@ -48,13 +51,22 @@ test('Maps story description', () => {
 });
 
 test('Maps status', () => {
-  expect(mappedData.stories[0].status).toEqual(123);
+  expect(mappedData.stories[0].status).toEqual('Ready for Development');
+});
+
+test('Uses status Id if status cannot be mapped', () => {
+  expect(getStateNameFromId([{
+    id: 1000,
+    states: [
+      { id: 5001, name: 'Dont use this' },
+    ],
+  }], 1000, 5002)).toEqual(5002);
 });
 
 test('Maps story comments', () => {
   expect(mappedData.stories[0].comments).not.toBeUndefined();
   expect(mappedData.stories[0].comments).toHaveLength(1);
   expect(mappedData.stories[0].comments[0].body).toEqual(data.stories[0].comments[0].text);
-  expect(mappedData.stories[0].comments[0].author).toEqual('Joe Bloggs');
+  expect(mappedData.stories[0].comments[0].author).toEqual(data.members[1].profile.email_address);
   expect(mappedData.stories[0].comments[0].created).toEqual(data.stories[0].comments[0].created_at);
 });
