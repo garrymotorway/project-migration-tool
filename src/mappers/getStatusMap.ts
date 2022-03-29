@@ -9,6 +9,7 @@ export default function getStatusMap() {
     '.*Merged.*': 'MERGED',
     '.*Shipped.*': 'SHIPPED',
     'Ready to Start': 'To Do',
+    'To do': 'To Do',
     'In Progress': 'In Progress',
     'Peer Review': 'PEER REVIEW',
     'Testing': 'TESTING',

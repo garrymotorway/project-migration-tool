@@ -1,5 +1,5 @@
 import {
-  CommonCommentsModelItem, CommonStoryModel, CommonStoryModelItem, CommonTaskModelItem,
+  CommonCommentsModelItem, CommonEpicModel, CommonStoryModel, CommonStoryModelItem, CommonTaskModelItem,
 } from '@mappers/CommonModels';
 import findAllDestinationValuesUsingRegexMatching from '@mappers/RegexMapperUtils';
 import getStatusMap from '@mappers/getStatusMap';
@@ -14,11 +14,34 @@ function fixLinks(text: string) {
   return text?.replace(/!?\[([^\]]+)\]\(([^)]+)\)/ig, '[$1|$2]');
 }
 
-function mapIssues(data: CommonStoryModel): any | string {
-  const storyStatuses = findAllDestinationValuesUsingRegexMatching(data.stories, statusMap, 'status');
-  const storyTypes = findAllDestinationValuesUsingRegexMatching(data.stories, typeMap, 'type');
+function generateEpicId(epicIndex: number) {
+  return `${process.env.PRODUCER_BOARD_ID}-${epicIndex + 1000000}`;
+}
 
-  return data.stories.map((story: CommonStoryModelItem, storyIndex: number) => ({
+function buildCustomFieldValues(story: CommonStoryModelItem, epics: CommonEpicModel[]) {
+  const result = [];
+  if (story.estimate) {
+    result.push({
+      fieldName: 'Story Points',
+      fieldType: 'com.atlassian.jira.plugin.system.customfieldtypes:float',
+      value: story.estimate,
+    });
+  }
+  if (story.epicId) {
+    result.push({
+      fieldName: 'Epic Link',
+      fieldType: 'com.pyxis.greenhopper.jira:gh-epic-link',
+      value: generateEpicId(epics.findIndex((epic: CommonEpicModel) => epic.id === story.epicId)),
+    });
+  }
+  return result;
+}
+
+function mapIssues(stories: CommonStoryModelItem[], epics: CommonEpicModel[]): any {
+  const storyStatuses = findAllDestinationValuesUsingRegexMatching(stories, statusMap, 'status');
+  const storyTypes = findAllDestinationValuesUsingRegexMatching(stories, typeMap, 'type');
+
+  const issues = stories.map((story: CommonStoryModelItem, storyIndex: number) => ({
     status: storyStatuses[storyIndex],
     reporter: story.reporter,
     issueType: storyTypes[storyIndex],
@@ -34,18 +57,35 @@ function mapIssues(data: CommonStoryModel): any | string {
       created: comment.created,
     })),
     labels: story.labels,
+    customFieldValues: buildCustomFieldValues(story, epics),
+  }));
+  return issues;
+}
+
+function mapEpics(epics: CommonEpicModel[]): any {
+  const epicStatuses = findAllDestinationValuesUsingRegexMatching(epics, statusMap, 'status');
+
+  return epics.map((epic: CommonEpicModel, epicIndex: number) => ({
+    status: epicStatuses[epicIndex],
+    key: generateEpicId(epicIndex),
+    issueType: 'Epic',
+    created: epic.created,
+    updated: epic.updated,
+    summary: epic.name,
+    externalId: epic.id,
+    reporter: epic.author,
     customFieldValues: [
       {
-        fieldName: 'Story Points',
-        fieldType: 'com.atlassian.jira.plugin.system.customfieldtypes:float',
-        value: story.estimate,
+        fieldName: 'Epic Name',
+        fieldType: 'com.pyxis.greenhopper.jira:gh-epic-label',
+        value: epic.name,
       },
     ],
   }));
 }
 
-function mapTasks(data: CommonStoryModel): any | string {
-  return data.stories.flatMap((story: CommonStoryModelItem) => story.tasks)
+function mapTasks(stories: CommonStoryModelItem[]): any | string {
+  return stories.flatMap((story: CommonStoryModelItem) => story.tasks)
     .map((task: CommonTaskModelItem) => ({
       status: task.complete ? 'Closed' : 'Open',
       reporter: task.reporter,
@@ -71,8 +111,9 @@ export default class {
   }
 
   static to(data: CommonStoryModel): any | string {
-    const tasks: any[] = mapTasks(data);
-    const issues: any[] = mapIssues(data);
+    const epics: any[] = mapEpics(data.epics);
+    const issues: any[] = mapIssues(data.stories, data.epics);
+    const tasks: any[] = mapTasks(data.stories);
 
     return {
       links: linkSubtasksToParents(data),
@@ -82,7 +123,7 @@ export default class {
         key: process.env.PRODUCER_BOARD_ID,
         description: fixLinks(data.project.description),
         type: 'software',
-        issues: issues.concat(tasks),
+        issues: epics.concat(issues.concat(tasks)),
       }],
     };
   }

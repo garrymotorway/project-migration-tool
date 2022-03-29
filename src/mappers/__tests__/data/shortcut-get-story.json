@@ -94,7 +94,7 @@
   "deadline": "2016-12-31T12:30:00Z",
   "description": "this is a description of my story for [@garry](http://www.google.com) with screenshot ![Screenshot 2022-03-21 at 14.25.43.png](https://media.app.shortcut.com/api/attachments/files/clubhouse-assets/file.png).",
   "entity_type": "foo",
-  "epic_id": 123,
+  "epic_id": 6619,
   "estimate": 123,
   "external_id": "foo",
   "external_links": [],

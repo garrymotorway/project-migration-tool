@@ -1,4 +1,4 @@
-import { CommonStoryModel } from '@mappers/CommonModels';
+import { CommonEpicModel, CommonStoryModel } from '@mappers/CommonModels';
 
 function getMemberEmailAddressById(members: any[], id: string) {
   return members
@@ -16,9 +16,28 @@ function cleanText(text: string) {
   return text?.replace(/\[@([^\]]+)\]\(([^\)]+)\)/ig, '@$1');
 }
 
+function getEpics({ stories, epics, members }: { stories: any[], epics: any[], members: any[] }): CommonEpicModel[] {
+  return Array.from(new Set(stories.filter((story: any) => story.epic_id).map((story: any) => story.epic_id)))
+    .map((epicId: number) => {
+      const epicDetails = epics.find((epic: any) => epic.id === epicId);
+      if (!epicDetails) {
+        throw new Error(`Could not find epic details for epic with id ${epicId}`);
+      }
+      return {
+        id: epicId,
+        name: epicDetails.name,
+        author: getMemberEmailAddressById(members, epicDetails.requested_by_id),
+        created: epicDetails.created_at,
+        updated: epicDetails.updated_at,
+        status: epicDetails.state,
+      };
+    });
+}
+
 export class ShortcutMapper {
   static from(data: any): CommonStoryModel {
     return {
+      epics: getEpics({ stories: data.stories, members: data.members, epics: data.epics }),
       stories: data.stories.map((item: any) => ({
         externalId: item.id,
         // externalId: item.external_id,
@@ -45,6 +64,7 @@ export class ShortcutMapper {
           reporter: getMemberEmailAddressById(data.members, task.requested_by_id),
           description: task.description,
         })),
+        epicId: item.epic_id,
       })),
       project: {
         name: data.group.name,

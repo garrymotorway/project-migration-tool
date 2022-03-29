@@ -4,12 +4,14 @@ const shortcutGetStoryData = require('./data/shortcut-get-story.json');
 const shortcutGroupData = require('./data/shortcut-group.json');
 const shortcutMemberData = require('./data/shortcut-members.json');
 const workflowData = require('./data/workflow-data.json');
+const epicData = require('./data/epic-data.json');
 
 const data: any = {
   stories: [shortcutGetStoryData],
   group: shortcutGroupData,
   members: shortcutMemberData,
   workflows: workflowData,
+  epics: epicData,
 };
 
 const mappedData = ShortcutMapper.from(data);
@@ -89,4 +91,14 @@ test('Maps story tasks', () => {
   expect(mappedData.stories[0].tasks[0].updated).toEqual(data.stories[0].tasks[0].updated_at);
   expect(mappedData.stories[0].tasks[0].reporter).toEqual(data.stories[0].tasks[0].reporter);
   expect(mappedData.stories[0].tasks[0].description).toEqual(data.stories[0].tasks[0].description);
+});
+test('Maps epic', () => {
+  expect(mappedData.epics).not.toBeUndefined();
+  expect(mappedData.epics).toHaveLength(1);
+  expect(mappedData.epics[0].id).toEqual(data.epics[0].id);
+  expect(mappedData.epics[0].name).toEqual(data.epics[0].name);
+  expect(mappedData.epics[0].author).toEqual('john.doe@motorway.co.uk');
+  expect(mappedData.epics[0].status).toEqual(data.epics[0].state);
+  expect(mappedData.epics[0].created).toEqual(data.epics[0].created_at);
+  expect(mappedData.epics[0].updated).toEqual(data.epics[0].updated_at);
 });

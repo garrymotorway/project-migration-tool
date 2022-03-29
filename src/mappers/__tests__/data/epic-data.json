@@ -1,0 +1,57 @@
+[
+	{
+		"app_url": "https:\/\/app.shortcut.com\/motorway\/epic\/6619",
+		"archived": true,
+		"started": false,
+		"entity_type": "epic",
+		"labels": [],
+		"mention_ids": [],
+		"member_mention_ids": [],
+		"project_ids": [
+			103
+		],
+		"stories_without_projects": 0,
+		"completed_at_override": null,
+		"productboard_plugin_id": null,
+		"started_at": null,
+		"completed_at": null,
+		"name": "Premium form refactoring",
+		"global_id": "v2:e:42552522-4980-4926-91ff-3d148e771e1a:6619",
+		"completed": false,
+		"productboard_url": null,
+		"planned_start_date": null,
+		"state": "to do",
+		"milestone_id": null,
+		"requested_by_id": "99999999-9012-3456-7890-112233441122",
+		"epic_state_id": 500000002,
+		"label_ids": [],
+		"started_at_override": null,
+		"group_id": null,
+		"updated_at": "2020-04-01T10:59:27Z",
+		"group_mention_ids": [],
+		"productboard_id": null,
+		"follower_ids": [
+			"111111111-b73d-4c7a-870a-9843910e4917"
+		],
+		"owner_ids": [],
+		"external_id": null,
+		"id": 6619,
+		"position": 0,
+		"productboard_name": null,
+		"deadline": null,
+		"stats": {
+			"num_points_done": 0,
+			"num_related_documents": 0,
+			"num_stories_unstarted": 8,
+			"num_stories_total": 8,
+			"last_story_update": "2020-02-28T13:38:13Z",
+			"num_points_started": 0,
+			"num_points_unstarted": 26,
+			"num_stories_started": 0,
+			"num_stories_unestimated": 0,
+			"num_points": 26,
+			"num_stories_done": 0
+		},
+		"created_at": "2019-06-17T12:34:42Z"
+	}
+]

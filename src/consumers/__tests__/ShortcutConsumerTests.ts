@@ -47,6 +47,14 @@ jest.mock('axios');
     };
   }
 
+  if (url === 'https://api.app.shortcut.com/api/v3/epics') {
+    return {
+      data: [
+        { id: 4000, name: 'Epic1' },
+      ],
+    };
+  }
+
   if (/https:\/\/api.app.shortcut.com\/api\/v3\/stories/i.test(url)) {
     return { data: { id: url.slice(url.length - 1) } };
   }
@@ -86,4 +94,10 @@ test('gets workflows from Shortcut', async () => {
   expect(dataFromShortcut.workflows[0].states).toHaveLength(1);
   expect(dataFromShortcut.workflows[0].states[0].name).toEqual('ToDo');
   expect(dataFromShortcut.workflows[0].states[0].id).toEqual(50000000);
+});
+
+test('gets epics from Shortcut', async () => {
+  const dataFromShortcut = await consumer.consume();
+  expect(dataFromShortcut.epics).toBeDefined();
+  expect(dataFromShortcut.epics.length).toEqual(1);
 });
