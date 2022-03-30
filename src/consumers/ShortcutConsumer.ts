@@ -26,7 +26,6 @@ export default class ShortcutConsumer implements Consumer {
       },
     });
 
-
     const epics = await axios.get('https://api.app.shortcut.com/api/v3/epics', {
       headers: {
         'Shortcut-Token': `${process.env.CONSUMER_TOKEN}`,

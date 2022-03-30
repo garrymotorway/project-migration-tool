@@ -14,7 +14,8 @@
           "@consumers/*": ["consumers/*"],
           "@producers/*": ["producers/*"],
           "@mappers/*": ["mappers/*"],
-          "@enums/*": ["enums/*"]
+          "@enums/*": ["enums/*"],
+          "@models/*": ["models/*"]
         }
     },
     "include": [

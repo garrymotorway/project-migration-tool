@@ -43,7 +43,8 @@
     "@consumers": "dist/consumers",
     "@producers": "dist/producers",
     "@mappers": "dist/mappers",
-    "@enums": "dist/enums"
+    "@enums": "dist/enums",
+    "@models": "dist/models"
   },
   "engines": {
     "node": "^16.1.4"

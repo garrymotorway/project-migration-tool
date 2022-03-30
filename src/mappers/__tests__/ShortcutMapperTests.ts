@@ -99,6 +99,7 @@ test('Maps story comments', () => {
 test('Do not map comments with missing or empty body', () => {
   expect(mapComments([{
     author_id: 'John Smith',
+    created_at: '2020-01-01',
   }], [])).toHaveLength(0);
 });
 

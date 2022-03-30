@@ -1,6 +1,6 @@
 import {
   CommonCommentsModelItem, CommonEpicModel, CommonSprintModel, CommonStoryModel, CommonStoryModelItem, CommonTaskModelItem,
-} from '@mappers/CommonModels';
+} from '@models/CommonModels';
 import findAllDestinationValuesUsingRegexMatching from '@mappers/RegexMapperUtils';
 import getStatusMap from '@mappers/getStatusMap';
 import getTypeMap from '@mappers/getTypeMap';

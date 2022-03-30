@@ -12,7 +12,8 @@
           ["@consumers", "src/consumers"],
           ["@producers", "src/producers"],
           ["@mappers", "src/mappers"],
-          ["@enums", "src/enums"]
+          ["@enums", "src/enums"],
+          ["@models", "src/models"]
         ],
         "extensions": [".ts", ".js"]
       },

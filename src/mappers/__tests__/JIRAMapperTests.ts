@@ -1,5 +1,5 @@
 import JIRAMapper, { getSprintStatus, generateEpicId } from '@mappers/JIRAMapper';
-import { CommonStoryModel, CommonSprintModel } from '@mappers/CommonModels';
+import { CommonStoryModel, CommonSprintModel } from '@models/CommonModels';
 import axios, { AxiosRequestConfig } from 'axios';
 
 jest.mock('axios');

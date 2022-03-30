@@ -1,25 +1,29 @@
-import { CommonCommentsModelItem, CommonEpicModel, CommonStoryModel } from '@mappers/CommonModels';
+import {
+  ShortcutCommentModel, ShortcutEpicModel, ShortcutIterationModel, ShortcutLabelModel, ShortcutMemberModel, ShortcutModel, ShortcutStoryModel, ShortcutTaskModel, ShortcutWorkflowModel, ShortcutWorkflowStateModel,
+} from '@/models/ShortcutModels';
+import { CommonCommentsModelItem, CommonEpicModel, CommonStoryModel } from '@models/CommonModels';
 
-function getMemberEmailAddressById(members: any[], id: string) {
-  return members
-    .find((member: any) => member.id === id)
-    ?.profile.email_address;
+function getMemberEmailAddressById(members: ShortcutMemberModel[], id: string): string {
+  return members.find((member: ShortcutMemberModel) => member.id === id)?.profile.email_address || id;
 }
 
-export function getStateNameFromId(workflows: any[], workflowId: number, workflowStateId: number) : string | number {
-  const thisWorkflow: any = workflows.find((workflow: any) => workflow.id === workflowId);
-  const thisState = thisWorkflow.states.find((state: any) => state.id === workflowStateId) || {};
-  return thisState.name || workflowStateId;
+export function getStateNameFromId(workflows: ShortcutWorkflowModel[], workflowId: number, workflowStateId: number) : string | number {
+  const thisWorkflow = workflows.find((workflow: ShortcutWorkflowModel) => workflow.id === workflowId);
+  const thisState = thisWorkflow?.states.find((state: ShortcutWorkflowStateModel) => state.id === workflowStateId);
+  return thisState?.name || workflowStateId;
 }
 
-function cleanText(text: string) {
+function cleanText(text: string | undefined): string | undefined {
+  if (!text) {
+    return text;
+  }
   return text?.replace(/\[@([^\]]+)\]\(([^)]+)\)/ig, '@$1');
 }
 
-function getEpics({ stories, epics, members }: { stories: any[], epics: any[], members: any[] }): CommonEpicModel[] {
-  return Array.from(new Set(stories.filter((story: any) => story.epic_id).map((story: any) => story.epic_id)))
+function getEpics({ stories, epics, members }: { stories: ShortcutStoryModel[], epics: ShortcutEpicModel[], members: ShortcutMemberModel[] }): CommonEpicModel[] {
+  return Array.from(new Set(stories.filter((story: ShortcutStoryModel) => story.epic_id).map((story: ShortcutStoryModel) => story.epic_id)))
     .map((epicId: number) => {
-      const epicDetails = epics.find((epic: any) => epic.id === epicId);
+      const epicDetails = epics.find((epic: ShortcutEpicModel) => epic.id === epicId);
       if (!epicDetails) {
         throw new Error(`Could not find epic details for epic with id ${epicId}`);
       }
@@ -34,19 +38,19 @@ function getEpics({ stories, epics, members }: { stories: any[], epics: any[], m
     });
 }
 
-export function mapComments(comments: any[], members: any[]): CommonCommentsModelItem[] {
-  return comments.filter((comment: any) => comment.text).map((comment: any) => ({
-    body: cleanText(comment.text),
+export function mapComments(comments: ShortcutCommentModel[], members: ShortcutMemberModel[]): CommonCommentsModelItem[] {
+  return comments.filter((comment: ShortcutCommentModel) => comment.text).map((comment: ShortcutCommentModel) => ({
+    body: cleanText(comment.text) || '',
     author: getMemberEmailAddressById(members, comment.author_id),
     created: comment.created_at,
   }));
 }
 
 export class ShortcutMapper {
-  static async from(data: any): Promise<CommonStoryModel> {
+  static async from(data: ShortcutModel): Promise<CommonStoryModel> {
     return {
       epics: getEpics({ stories: data.stories, members: data.members, epics: data.epics }),
-      stories: data.stories.map((item: any) => ({
+      stories: data.stories.map((item: ShortcutStoryModel) => ({
         externalId: item.id,
         // externalId: item.external_id,
         updated: item.updated_at,
@@ -57,10 +61,10 @@ export class ShortcutMapper {
         // status: item.workflow_state_id,
         status: getStateNameFromId(data.workflows, item.workflow_id, item.workflow_state_id),
         title: item.name,
-        description: cleanText(item.description),
+        description: cleanText(item.description) || '',
         estimate: item.estimate,
-        labels: item.labels?.map((label: any) => label.name),
-        tasks: item.tasks.map((task: any) => ({
+        labels: item.labels?.map((label: ShortcutLabelModel) => label.name),
+        tasks: item.tasks.map((task: ShortcutTaskModel) => ({
           id: task.id,
           complete: task.complete,
           created: task.created_at,
@@ -74,19 +78,24 @@ export class ShortcutMapper {
       })),
       project: {
         name: data.group.name,
-        description: cleanText(data.group.description),
+        description: cleanText(data.group.description) || '',
       },
       sprints: (Array.from(new Set(data.stories
-        .filter((story: any) => story.iteration_id)
-        .map((story: any) => story.iteration_id))) as number[])
-        .map((iterationId: number) => data.sprints.find((sprint: any) => sprint.id === iterationId))
-        .map((sprint: any) => ({
-          id: sprint.id,
-          name: sprint.name,
-          start: sprint.start_date,
-          end: sprint.end_date,
-          completed: !!sprint.end_date,
-        })),
+        .filter((story: ShortcutStoryModel) => story.iteration_id)
+        .map((story: ShortcutStoryModel) => story.iteration_id))) as number[])
+        .map((iterationId: number) => data.sprints.find((sprint: ShortcutIterationModel) => sprint.id === iterationId) || iterationId)
+        .map((sprint: ShortcutIterationModel | number) => {
+          if (typeof sprint === 'number') {
+            throw new Error(`Shortcut iteration with id ${sprint} not found. This shouldn't happen, so something must have gone wrong with Shortcut data extract.`);
+          }
+          return {
+            id: sprint.id,
+            name: sprint.name,
+            start: sprint.start_date,
+            end: sprint.end_date,
+            completed: !!sprint.end_date,
+          };
+        }),
     };
   }
 
