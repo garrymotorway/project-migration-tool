@@ -15,8 +15,16 @@ function fixLinks(text: string) {
   return text?.replace(/!?\[([^\]]+)\]\(([^)]+)\)/ig, '[$1|$2]');
 }
 
-function generateEpicId(epicIndex: number) {
-  return `${process.env.PRODUCER_BOARD_ID}-${epicIndex + 1000000}`;
+export function generateEpicId(epicIndex: number) {
+  return `${process.env.PRODUCER_BOARD_ID}-${epicIndex + parseInt(process.env.DEST_SEED || '1000000', 10) + 50000}`;
+}
+
+export function generateIssueId(issueIndex: number) {
+  return `${process.env.PRODUCER_BOARD_ID}-${issueIndex + parseInt(process.env.DEST_SEED || '1000000', 10) + 100000}`;
+}
+
+export function generateTaskId(issueIndex: number) {
+  return `${process.env.PRODUCER_BOARD_ID}-${issueIndex + parseInt(process.env.DEST_SEED || '1000000', 10) + 200000}`;
 }
 
 export function getSprintStatus(sprint: CommonSprintModel) {
@@ -55,7 +63,7 @@ function buildCustomFieldValues(story: CommonStoryModelItem, epics: CommonEpicMo
     result.push({
       fieldName: 'Epic Link',
       fieldType: 'com.pyxis.greenhopper.jira:gh-epic-link',
-      value: generateEpicId(epics.findIndex((epic: CommonEpicModel) => epic.id === story.epicId)),
+      value: generateEpicId(+story.epicId),
     });
   }
   if (story.sprintId) {
@@ -99,7 +107,7 @@ async function mapIssues(stories: CommonStoryModelItem[], epics: CommonEpicModel
     // resolution: 'Duplicate', // probably not required
     summary: story.title,
     description: fixLinks(story.description),
-    externalId: story.externalId,
+    externalId: story.externalId?.toString(),
     comments: story.comments.map((comment: CommonCommentsModelItem) => ({
       body: fixLinks(comment.body),
       author: emailToJiraAccountId(users, comment.author),
@@ -107,6 +115,7 @@ async function mapIssues(stories: CommonStoryModelItem[], epics: CommonEpicModel
     })),
     labels: story.labels,
     customFieldValues: buildCustomFieldValues(story, epics, sprints),
+    key: generateIssueId(parseInt(story?.externalId?.toString() || '0', 10)),
   }));
   return issues;
 }
@@ -116,12 +125,12 @@ async function mapEpics(epics: CommonEpicModel[], users: any[]): Promise<any> {
 
   return epics.map((epic: CommonEpicModel, epicIndex: number) => ({
     status: epicStatuses[epicIndex],
-    key: generateEpicId(epicIndex),
+    key: generateEpicId(parseInt(epic?.id?.toString() || '0', 10)),
     issueType: 'Epic',
     created: epic.created,
     updated: epic.updated,
     summary: epic.name,
-    externalId: epic.id,
+    externalId: epic.id.toString(),
     reporter: emailToJiraAccountId(users, epic.author),
     customFieldValues: [
       {
@@ -133,16 +142,25 @@ async function mapEpics(epics: CommonEpicModel[], users: any[]): Promise<any> {
   }));
 }
 
+const MAX_SUMMARY_LENGTH = 255;
+function trimmedSummary(summary: string) {
+  return summary.split('\n')[0].replace(new RegExp(`(?<=.{${MAX_SUMMARY_LENGTH - 3},${MAX_SUMMARY_LENGTH - 3}}).*`, ''), '...').replace(/\s+...$/, '...');
+  // const regexToFindTheLastSpaceBeforeTheLimitForSummaryAndTrimAllCharactersBeyondIt = new RegExp(`(.{${MAX_SUMMARY_LENGTH},${MAX_SUMMARY_LENGTH}}(?=\\s)|.{1,${MAX_SUMMARY_LENGTH}}(?=\\s)).*`);
+  // return summary.split('\n')[0].replace(regexToFindTheLastSpaceBeforeTheLimitForSummaryAndTrimAllCharactersBeyondIt, '$1');
+}
+
 async function mapTasks(stories: CommonStoryModelItem[], users: any[]): Promise<any | string> {
   return stories.flatMap((story: CommonStoryModelItem) => story.tasks)
     .map((task: CommonTaskModelItem) => ({
-      status: task.complete ? 'Closed' : 'Open',
+      status: task.complete ? 'Done' : 'To Do',
       reporter: emailToJiraAccountId(users, task.reporter),
       issueType: 'Sub-task',
       created: task.created,
       updated: task.updated,
-      summary: task.description,
-      externalId: task.id,
+      summary: trimmedSummary(task.name),
+      description: task.description,
+      externalId: task.id?.toString(),
+      key: generateTaskId(parseInt(task?.id?.toString() || '0', 10)),
     }));
 }
 
@@ -150,7 +168,7 @@ function linkSubtasksToParents(data: CommonStoryModel): any[] {
   return data.stories.flatMap((story: CommonStoryModelItem) => story.tasks.map((task: CommonTaskModelItem) => ({
     sourceId: task.id?.toString(),
     destinationId: story.externalId?.toString(),
-    name: task.description,
+    name: trimmedSummary(task.description),
   })));
 }
 

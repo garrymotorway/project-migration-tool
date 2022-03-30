@@ -1,6 +1,6 @@
-import JIRAMapper, { getSprintStatus } from '@mappers/JIRAMapper';
+import JIRAMapper, { getSprintStatus, generateEpicId } from '@mappers/JIRAMapper';
 import { CommonStoryModel, CommonSprintModel } from '@mappers/CommonModels';
-import axios, { AxiosRequestConfig, AxiosRequestHeaders } from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 
 jest.mock('axios');
 
@@ -45,7 +45,8 @@ const data: CommonStoryModel = {
       created: '2022-03-21T09:19:57Z',
       updated: '2022-03-21T09:19:57Z',
       reporter: 'john.doe@motorway.co.uk',
-      description: 'This is a task',
+      name: 'This is a task with a really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really really very really really really really really really really really really really really really\nlong name',
+      description: 'This is a task\nwith a second line',
     }],
     epicId: '78393',
     sprintId: 12345,
@@ -151,16 +152,17 @@ test('Maps comments', () => {
 
 test('Maps tasks and creates the links to parent story', () => {
   expect(task).toBeDefined();
-  expect(task.status).toEqual('Open');
+  expect(task.status).toEqual('To Do');
   expect(task.reporter).toEqual('abc456');
-  expect(task.summary).toEqual(data.stories[0].tasks[0].description);
+  expect(task.summary).toEqual(`${data.stories[0].tasks[0].name.substring(0, 252)}...`);
+  expect(task.description).toEqual(data.stories[0].tasks[0].description);
   expect(task.issueType).toEqual('Sub-task');
   expect(task.created).toEqual(data.stories[0].tasks[0].created);
   expect(task.updated).toEqual(data.stories[0].tasks[0].updated);
-  expect(task.externalId).toEqual(data.stories[0].tasks[0].id);
+  expect(task.externalId).toEqual(data.stories[0].tasks[0].id?.toString());
 
   expect(link).toBeDefined();
-  expect(link.name).toEqual(data.stories[0].tasks[0].description);
+  expect(link.name).toEqual(data.stories[0].tasks[0].description.split('\n')[0]);
   expect(link.sourceId).toEqual(data.stories[0].tasks[0].id?.toString());
   expect(link.destinationId).toEqual(data.stories[0].externalId);
 });
@@ -168,17 +170,22 @@ test('Maps tasks and creates the links to parent story', () => {
 test('Adds epics to issues', () => {
   expect(epic).toBeDefined();
   expect(epic.status).toEqual('To Do');
-  expect(epic.key).toEqual(`${process.env.PRODUCER_BOARD_ID}-1000000`);
+  expect(epic.key).toEqual(generateEpicId(+data.epics[0].id));
   expect(epic.reporter).toEqual('abc456');
   expect(epic.summary).toEqual(data.epics[0].name);
   expect(epic.issueType).toEqual('Epic');
   expect(epic.created).toEqual(data.epics[0].created);
   expect(epic.updated).toEqual(data.epics[0].updated);
-  expect(epic.externalId).toEqual(data.epics[0].id);
+  expect(epic.externalId).toEqual(data.epics[0].id?.toString());
   expect(epic.customFieldValues).toContainEqual({
     fieldName: 'Epic Name',
     fieldType: 'com.pyxis.greenhopper.jira:gh-epic-label',
     value: data.epics[0].name,
+  });
+  expect(story.customFieldValues).toContainEqual({
+    fieldName: 'Epic Link',
+    fieldType: 'com.pyxis.greenhopper.jira:gh-epic-link',
+    value: epic.key,
   });
 });
 
@@ -186,7 +193,7 @@ test('Links epic to story', () => {
   expect(story.customFieldValues).toContainEqual({
     fieldName: 'Epic Link',
     fieldType: 'com.pyxis.greenhopper.jira:gh-epic-link',
-    value: `${process.env.PRODUCER_BOARD_ID}-1000000`,
+    value: generateEpicId(+data.epics[0].id),
   });
 });
 

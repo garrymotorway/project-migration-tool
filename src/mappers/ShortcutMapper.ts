@@ -1,4 +1,4 @@
-import { CommonEpicModel, CommonStoryModel } from '@mappers/CommonModels';
+import { CommonCommentsModelItem, CommonEpicModel, CommonStoryModel } from '@mappers/CommonModels';
 
 function getMemberEmailAddressById(members: any[], id: string) {
   return members
@@ -13,7 +13,7 @@ export function getStateNameFromId(workflows: any[], workflowId: number, workflo
 }
 
 function cleanText(text: string) {
-  return text?.replace(/\[@([^\]]+)\]\(([^\)]+)\)/ig, '@$1');
+  return text?.replace(/\[@([^\]]+)\]\(([^)]+)\)/ig, '@$1');
 }
 
 function getEpics({ stories, epics, members }: { stories: any[], epics: any[], members: any[] }): CommonEpicModel[] {
@@ -34,6 +34,14 @@ function getEpics({ stories, epics, members }: { stories: any[], epics: any[], m
     });
 }
 
+export function mapComments(comments: any[], members: any[]): CommonCommentsModelItem[] {
+  return comments.filter((comment: any) => comment.text).map((comment: any) => ({
+    body: cleanText(comment.text),
+    author: getMemberEmailAddressById(members, comment.author_id),
+    created: comment.created_at,
+  }));
+}
+
 export class ShortcutMapper {
   static async from(data: any): Promise<CommonStoryModel> {
     return {
@@ -44,11 +52,7 @@ export class ShortcutMapper {
         updated: item.updated_at,
         created: item.created_at,
         reporter: getMemberEmailAddressById(data.members, item.requested_by_id),
-        comments: item.comments.map((comment: any) => ({
-          body: cleanText(comment.text),
-          author: getMemberEmailAddressById(data.members, comment.author_id),
-          created: comment.created_at,
-        })),
+        comments: mapComments(item.comments, data.members),
         type: item.story_type,
         // status: item.workflow_state_id,
         status: getStateNameFromId(data.workflows, item.workflow_id, item.workflow_state_id),
@@ -62,6 +66,7 @@ export class ShortcutMapper {
           created: task.created_at,
           updated: task.updated_at,
           reporter: getMemberEmailAddressById(data.members, task.requested_by_id),
+          name: task.description,
           description: task.description,
         })),
         epicId: item.epic_id,

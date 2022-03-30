@@ -26,6 +26,7 @@ process.env.PRODUCER_BOARD_ID = 'HOT';
 process.env.PRODUCER_BOARD_RAPID_VIEW_ID = 7; // Board ID (in JIRA find this in the URL)
 process.env.SAMPLE = 10; // Optional - can be used to try a sample first. Will get all data if omitted.
 process.env.DEFAULT_REPORTER = 'garry@motorway.co.uk'; // Optional - if reporter doesn't exist in JIRA this will be used. If this isn't specified the account of the person doing the import is used by JIRA
+process.env.DEST_SEED=1000000 // Make sure it is higher than the highest issue number if issues already exist. Used for keys, epics will be this + 5000, issues + 10000, tasks +20000
 
 (async function () {
   await PMT.default('shortcut', 'jira');

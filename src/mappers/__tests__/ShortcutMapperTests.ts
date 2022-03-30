@@ -1,4 +1,4 @@
-import { ShortcutMapper, getStateNameFromId } from '@mappers/ShortcutMapper';
+import { ShortcutMapper, getStateNameFromId, mapComments } from '@mappers/ShortcutMapper';
 
 const shortcutGetStoryData = require('./data/shortcut-get-story.json');
 const shortcutGroupData = require('./data/shortcut-group.json');
@@ -96,6 +96,12 @@ test('Maps story comments', () => {
   expect(mappedData.stories[0].comments[0].created).toEqual(data.stories[0].comments[0].created_at);
 });
 
+test('Do not map comments with missing or empty body', () => {
+  expect(mapComments([{
+    author_id: 'John Smith',
+  }], [])).toHaveLength(0);
+});
+
 test('Maps story tasks', () => {
   expect(mappedData.stories[0].tasks).not.toBeUndefined();
   expect(mappedData.stories[0].tasks).toHaveLength(1);
@@ -104,6 +110,7 @@ test('Maps story tasks', () => {
   expect(mappedData.stories[0].tasks[0].created).toEqual(data.stories[0].tasks[0].created_at);
   expect(mappedData.stories[0].tasks[0].updated).toEqual(data.stories[0].tasks[0].updated_at);
   expect(mappedData.stories[0].tasks[0].reporter).toEqual(data.stories[0].tasks[0].reporter);
+  expect(mappedData.stories[0].tasks[0].name).toEqual(data.stories[0].tasks[0].description);
   expect(mappedData.stories[0].tasks[0].description).toEqual(data.stories[0].tasks[0].description);
 });
 test('Maps epic', () => {

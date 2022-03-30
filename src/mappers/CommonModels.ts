@@ -22,6 +22,7 @@ export interface CommonTaskModelItem {
   created: string;
   updated: string;
   reporter: string;
+  name: string;
   description: string;
 }
 

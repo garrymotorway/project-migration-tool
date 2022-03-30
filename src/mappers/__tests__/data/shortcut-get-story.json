@@ -215,7 +215,7 @@
     "complete": false,
     "completed_at": "2016-12-31T12:30:00Z",
     "created_at": "2016-12-31T12:30:00Z",
-    "description": "foo",
+    "description": "foo\nbar",
     "entity_type": "foo",
     "external_id": "foo",
     "group_mention_ids": ["12345678-9012-3456-7890-123456789012"],
