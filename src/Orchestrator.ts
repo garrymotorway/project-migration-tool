@@ -21,8 +21,8 @@ export default class Orchestrator {
 
   async run() {
     const data = await this.consumer.consume();
-    const mappedFromSource = this.mapper.from(data);
-    const mappedToDest = this.mapper.to(mappedFromSource);
+    const mappedFromSource = await this.mapper.from(data);
+    const mappedToDest = await this.mapper.to(mappedFromSource);
     await this.producer.produce(mappedToDest);
   }
 }

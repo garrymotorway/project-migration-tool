@@ -1,5 +1,24 @@
-import JIRAMapper from '@mappers/JIRAMapper';
-import { CommonStoryModel } from '@mappers/CommonModels';
+import JIRAMapper, { getSprintStatus } from '@mappers/JIRAMapper';
+import { CommonStoryModel, CommonSprintModel } from '@mappers/CommonModels';
+import axios, { AxiosRequestConfig, AxiosRequestHeaders } from 'axios';
+
+jest.mock('axios');
+
+(axios.get as unknown as jest.Mock).mockImplementation(async (url: string, requestConfig: AxiosRequestConfig) => {
+  if (requestConfig.headers?.Authorization !== `Basic ${process.env.PRODUCER_TOKEN}`) {
+    throw new Error('Mock threw simulated 401. Token not provided in request');
+  }
+  if (url === 'https://motorway.atlassian.net/rest/api/3/users/search?&includeInactive=true') {
+    return {
+      data: [
+        { emailAddress: 'luke.skywalker@motorway.co.uk', accountId: 'abc123' },
+        { emailAddress: 'john.doe@motorway.co.uk', accountId: 'abc456' },
+      ],
+    };
+  }
+
+  throw new Error(`No mock for URL ${url}`);
+});
 
 const data: CommonStoryModel = {
   stories: [{
@@ -10,7 +29,7 @@ const data: CommonStoryModel = {
     comments: [
       {
         body: '[@huwrose](shortcutapp://members/5dc00b1d-aa52-4a44-a0d9-4182ef9f9be6) hello and you [@john](shortcutapp://members/5dc00b1d-aa52-4a44-a0d9-4182ef9f9be7) how are you. Also [@johnSmith](shortcutapp://members/5dc00b1d-aa52-4a44-a0d9-4182ef9f9be8)',
-        author: 'Luke Skywalker',
+        author: 'luke.skywalker@motorway.co.uk',
         created: '2022-03-22T09:19:57Z',
       },
     ],
@@ -25,10 +44,11 @@ const data: CommonStoryModel = {
       complete: false,
       created: '2022-03-21T09:19:57Z',
       updated: '2022-03-21T09:19:57Z',
-      reporter: 'John Doe',
+      reporter: 'john.doe@motorway.co.uk',
       description: 'This is a task',
     }],
     epicId: '78393',
+    sprintId: 12345,
   }],
   project: {
     name: 'Project Name',
@@ -38,20 +58,34 @@ const data: CommonStoryModel = {
     {
       id: '78393',
       name: 'my epic',
-      author: 'Jane Doe',
+      author: 'john.doe@motorway.co.uk',
       created: '2022-03-21T12:39:57Z',
       updated: '2022-03-21T12:39:57Z',
       status: 'to do',
     },
   ],
+  sprints: [
+    {
+      id: 12345,
+      name: 'Sprint 12',
+      start: '2022-01-01',
+      end: '2022-01-15',
+      completed: true,
+    },
+  ],
 };
 
-const mappedData: any = JIRAMapper.to(data);
+let mappedData: any;
+let epic: any;
+let story: any;
+let task: any;
+let link: any;
 
-const epic: any = mappedData.projects[0].issues[0];
-const story: any = mappedData.projects[0].issues[1];
-const task: any = mappedData.projects[0].issues[2];
-const link: any = mappedData.links[0];
+beforeAll(async () => {
+  mappedData = await JIRAMapper.to(data);
+  [epic, story, task] = mappedData.projects[0].issues;
+  [link] = mappedData.links;
+});
 
 test('Maps project external ID', () => {
   expect(mappedData.projects[0].id).toEqual(process.env.PRODUCER_BOARD_ID);
@@ -111,14 +145,14 @@ test('Maps comments', () => {
   expect(story.comments).toBeDefined();
   expect(story.comments[0]).toBeDefined();
   expect(story.comments[0].body).toEqual('[@huwrose|shortcutapp://members/5dc00b1d-aa52-4a44-a0d9-4182ef9f9be6] hello and you [@john|shortcutapp://members/5dc00b1d-aa52-4a44-a0d9-4182ef9f9be7] how are you. Also [@johnSmith|shortcutapp://members/5dc00b1d-aa52-4a44-a0d9-4182ef9f9be8]');
-  expect(story.comments[0].author).toEqual(data.stories[0].comments[0].author);
+  expect(story.comments[0].author).toEqual('abc123');
   expect(story.comments[0].created).toEqual(data.stories[0].comments[0].created);
 });
 
 test('Maps tasks and creates the links to parent story', () => {
   expect(task).toBeDefined();
   expect(task.status).toEqual('Open');
-  expect(task.reporter).toEqual(data.stories[0].tasks[0].reporter);
+  expect(task.reporter).toEqual('abc456');
   expect(task.summary).toEqual(data.stories[0].tasks[0].description);
   expect(task.issueType).toEqual('Sub-task');
   expect(task.created).toEqual(data.stories[0].tasks[0].created);
@@ -135,27 +169,74 @@ test('Adds epics to issues', () => {
   expect(epic).toBeDefined();
   expect(epic.status).toEqual('To Do');
   expect(epic.key).toEqual(`${process.env.PRODUCER_BOARD_ID}-1000000`);
-  expect(epic.reporter).toEqual(data.epics[0].author);
+  expect(epic.reporter).toEqual('abc456');
   expect(epic.summary).toEqual(data.epics[0].name);
   expect(epic.issueType).toEqual('Epic');
   expect(epic.created).toEqual(data.epics[0].created);
   expect(epic.updated).toEqual(data.epics[0].updated);
   expect(epic.externalId).toEqual(data.epics[0].id);
-
-  expect(epic.customFieldValues).toBeDefined();
-  expect(epic.customFieldValues[0].fieldName).toEqual('Epic Name');
-  expect(epic.customFieldValues[0].fieldType).toEqual('com.pyxis.greenhopper.jira:gh-epic-label');
-  expect(epic.customFieldValues[0].value).toEqual(data.epics[0].name);
+  expect(epic.customFieldValues).toContainEqual({
+    fieldName: 'Epic Name',
+    fieldType: 'com.pyxis.greenhopper.jira:gh-epic-label',
+    value: data.epics[0].name,
+  });
 });
 
 test('Links epic to story', () => {
-  const customFieldValue: any = story.customFieldValues.find((item: any) => item.fieldName === 'Epic Link');
+  expect(story.customFieldValues).toContainEqual({
+    fieldName: 'Epic Link',
+    fieldType: 'com.pyxis.greenhopper.jira:gh-epic-link',
+    value: `${process.env.PRODUCER_BOARD_ID}-1000000`,
+  });
+});
+
+test('Links sprint to story', () => {
+  const customFieldValue: any = story.customFieldValues.find((item: any) => item.fieldName === 'Sprint');
   expect(customFieldValue).toBeDefined();
-  expect(customFieldValue.fieldName).toEqual('Epic Link');
-  expect(customFieldValue.fieldType).toEqual('com.pyxis.greenhopper.jira:gh-epic-link');
-  expect(customFieldValue.value).toEqual(`${process.env.PRODUCER_BOARD_ID}-1000000`);
+  expect(customFieldValue.fieldName).toEqual('Sprint');
+  expect(customFieldValue.fieldType).toEqual('com.pyxis.greenhopper.jira:gh-sprint');
+  expect(customFieldValue.value).toEqual([{
+    rapidViewId: parseInt(process.env.PRODUCER_BOARD_RAPID_VIEW_ID || '0', 10),
+    state: 'CLOSED',
+    startDate: data.sprints[0].start,
+    endDate: data.sprints[0].end,
+    completeDate: data.sprints[0].end,
+    name: data.sprints[0].name,
+  }]);
 });
 
 test('Maps story type', () => {
   expect(mappedData.projects[0].issues[1].issueType).toEqual('Task');
+});
+
+describe('Sprint statuses', () => {
+  let sprint: CommonSprintModel;
+  beforeEach(() => {
+    sprint = {
+      id: 123,
+      name: 'Bla',
+      start: '2022-01-02',
+      completed: false,
+    };
+  });
+
+  test('CLOSED if completed is true', () => {
+    Object.assign(sprint, { completed: true });
+    expect(getSprintStatus(sprint)).toEqual('CLOSED');
+  });
+
+  test('CLOSED if end is in the past', () => {
+    Object.assign(sprint, { end: '2010-01-01' });
+    expect(getSprintStatus(sprint)).toEqual('CLOSED');
+  });
+
+  test('FUTURE if start is in the future', () => {
+    Object.assign(sprint, { start: '2500-01-01' });
+    expect(getSprintStatus(sprint)).toEqual('FUTURE');
+  });
+
+  test('ACTIVE if now is within start and end', () => {
+    Object.assign(sprint, { start: '1800-01-01', end: '2500-01-01' });
+    expect(getSprintStatus(sprint)).toEqual('ACTIVE');
+  });
 });

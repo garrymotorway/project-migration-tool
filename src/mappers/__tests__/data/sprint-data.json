@@ -1,0 +1,35 @@
+[
+	{
+		"app_url": "https:\/\/app.shortcut.com\/motorway\/iteration\/24418",
+		"entity_type": "iteration",
+		"labels": [],
+		"mention_ids": [],
+		"member_mention_ids": [],
+		"name": "Dealer 21 🤟",
+		"label_ids": [],
+		"updated_at": "2020-11-13T07:30:34Z",
+		"group_mention_ids": [],
+		"end_date": "2020-11-24",
+		"follower_ids": [
+			"5f68cc2e-51af-4f58-b567-3f0e067db439"
+		],
+		"group_ids": [],
+		"start_date": "2020-11-10",
+		"status": "done",
+		"id": 24418,
+		"stats": {
+			"num_points_done": 29,
+			"num_related_documents": 0,
+			"average_cycle_time": 654262,
+			"num_stories_unstarted": 0,
+			"num_points_started": 0,
+			"num_points_unstarted": 0,
+			"num_stories_started": 0,
+			"num_stories_unestimated": 2,
+			"average_lead_time": 2596192,
+			"num_points": 29,
+			"num_stories_done": 15
+		},
+		"created_at": "2020-11-03T17:22:05Z"
+	}
+]

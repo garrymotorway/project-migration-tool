@@ -33,7 +33,13 @@ export default class ShortcutConsumer implements Consumer {
       },
     });
 
-    const groupStoriesPromises = groupStoriesResponse.data./* slice(0, 10). */map((item: any, storyIndex: number) => {
+    const sprints = await axios.get('https://api.app.shortcut.com/api/v3/iterations', {
+      headers: {
+        'Shortcut-Token': `${process.env.CONSUMER_TOKEN}`,
+      },
+    });
+
+    const groupStoriesPromises = (process.env.SAMPLE ? groupStoriesResponse.data.slice(0, parseInt(process.env.SAMPLE, 10)) : groupStoriesResponse.data).map((item: any, storyIndex: number) => {
       const delayOffset = (storyIndex + 1) * SHORT_SLEEP_TIME_TO_AVOID_SPAMMING_SOURCE_API_MS;
       return sleep(delayOffset)
         .then(() => axios.get(`https://api.app.shortcut.com/api/v3/stories/${item.id}`, { headers: { 'Shortcut-Token': `${process.env.CONSUMER_TOKEN}` } }));
@@ -57,6 +63,7 @@ export default class ShortcutConsumer implements Consumer {
       members: members.data,
       workflows: workflows.data,
       epics: epics.data,
+      sprints: sprints.data,
     };
   }
 }

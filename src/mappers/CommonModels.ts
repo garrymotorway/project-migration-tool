@@ -7,6 +7,7 @@ export interface CommonStoryModel {
   stories: CommonStoryModelItem[];
   project: CommonProject;
   epics: CommonEpicModel[];
+  sprints: CommonSprintModel[];
 }
 
 export interface CommonCommentsModelItem {
@@ -38,6 +39,7 @@ export interface CommonStoryModelItem {
   estimate?: number;
   labels: string[];
   epicId?: string | number;
+  sprintId?: string | number;
 }
 
 export interface CommonEpicModel {
@@ -47,4 +49,12 @@ export interface CommonEpicModel {
   created: string;
   updated: string;
   status: string | number;
+}
+
+export interface CommonSprintModel {
+  id: string | number;
+  name: string;
+  start: string;
+  end?: string;
+  completed: boolean;
 }

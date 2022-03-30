@@ -121,7 +121,7 @@
   "group_id": "12345678-9012-3456-7890-123456789012",
   "group_mention_ids": ["12345678-9012-3456-7890-123456789012"],
   "id": 123,
-  "iteration_id": 123,
+  "iteration_id": 24418,
   "label_ids": [123],
   "labels": [{
     "app_url": "foo",

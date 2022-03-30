@@ -55,6 +55,16 @@ jest.mock('axios');
     };
   }
 
+  if (url === 'https://api.app.shortcut.com/api/v3/iterations') {
+    return {
+      data: [
+        {
+          id: 4000, name: 'Dealer 15', start_date: '2020-11-10', end_date: '2020-11-24', status: 'done',
+        },
+      ],
+    };
+  }
+
   if (/https:\/\/api.app.shortcut.com\/api\/v3\/stories/i.test(url)) {
     return { data: { id: url.slice(url.length - 1) } };
   }
@@ -100,4 +110,10 @@ test('gets epics from Shortcut', async () => {
   const dataFromShortcut = await consumer.consume();
   expect(dataFromShortcut.epics).toBeDefined();
   expect(dataFromShortcut.epics.length).toEqual(1);
+});
+
+test('gets iterations (sprints) from Shortcut', async () => {
+  const dataFromShortcut = await consumer.consume();
+  expect(dataFromShortcut.sprints).toBeDefined();
+  expect(dataFromShortcut.sprints.length).toEqual(1);
 });

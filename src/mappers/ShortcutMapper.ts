@@ -35,7 +35,7 @@ function getEpics({ stories, epics, members }: { stories: any[], epics: any[], m
 }
 
 export class ShortcutMapper {
-  static from(data: any): CommonStoryModel {
+  static async from(data: any): Promise<CommonStoryModel> {
     return {
       epics: getEpics({ stories: data.stories, members: data.members, epics: data.epics }),
       stories: data.stories.map((item: any) => ({
@@ -65,15 +65,27 @@ export class ShortcutMapper {
           description: task.description,
         })),
         epicId: item.epic_id,
+        sprintId: item.iteration_id,
       })),
       project: {
         name: data.group.name,
         description: cleanText(data.group.description),
       },
+      sprints: (Array.from(new Set(data.stories
+        .filter((story: any) => story.iteration_id)
+        .map((story: any) => story.iteration_id))) as number[])
+        .map((iterationId: number) => data.sprints.find((sprint: any) => sprint.id === iterationId))
+        .map((sprint: any) => ({
+          id: sprint.id,
+          name: sprint.name,
+          start: sprint.start_date,
+          end: sprint.end_date,
+          completed: !!sprint.end_date,
+        })),
     };
   }
 
-  static to(/* data: CommonStoryModel */): any {
+  static async to(/* data: CommonStoryModel */): Promise<any> {
     throw new Error('Not implemented');
   }
 }
