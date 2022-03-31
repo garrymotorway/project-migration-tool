@@ -8,7 +8,8 @@
 		"mention_ids": [],
 		"member_mention_ids": [],
 		"project_ids": [
-			103
+			42129,
+			42130
 		],
 		"stories_without_projects": 0,
 		"completed_at_override": null,

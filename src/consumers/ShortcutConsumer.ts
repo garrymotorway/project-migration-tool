@@ -38,6 +38,12 @@ export default class ShortcutConsumer implements Consumer {
       },
     });
 
+    const projects = await axios.get('https://api.app.shortcut.com/api/v3/projects', {
+      headers: {
+        'Shortcut-Token': `${process.env.CONSUMER_TOKEN}`,
+      },
+    });
+
     const groupStoriesPromises = (process.env.SAMPLE ? groupStoriesResponse.data.slice(0, parseInt(process.env.SAMPLE, 10)) : groupStoriesResponse.data).map((item: any, storyIndex: number) => {
       const delayOffset = (storyIndex + 1) * SHORT_SLEEP_TIME_TO_AVOID_SPAMMING_SOURCE_API_MS;
       return sleep(delayOffset)
@@ -63,6 +69,7 @@ export default class ShortcutConsumer implements Consumer {
       workflows: workflows.data,
       epics: epics.data,
       sprints: sprints.data,
+      projects: projects.data,
     };
   }
 }

@@ -26,6 +26,8 @@ export interface ShortcutStoryModel {
   archived: boolean;
   blocked: boolean;
   blocker: boolean;
+  completed: boolean;
+  project_id: number;
 }
 
 export interface ShortcutLabelModel {
@@ -45,6 +47,7 @@ export interface ShortcutEpicModel {
   created_at: string;
   updated_at: string;
   state: string;
+  project_ids: number[];
 }
 
 export interface ShortcutMemberModel {
@@ -77,6 +80,12 @@ export interface ShortcutGroup {
 
 }
 
+export interface ShortcutProjectsModel {
+  id: number;
+  name: string;
+  description: string;
+}
+
 export interface ShortcutModel {
   sprints: ShortcutIterationModel[];
   group: ShortcutGroup;
@@ -84,4 +93,5 @@ export interface ShortcutModel {
   epics: ShortcutEpicModel[];
   stories: ShortcutStoryModel[];
   workflows: ShortcutWorkflowModel[];
+  projects: ShortcutProjectsModel[];
 }

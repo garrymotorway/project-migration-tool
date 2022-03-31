@@ -1,5 +1,5 @@
 import {
-  ShortcutCommentModel, ShortcutEpicModel, ShortcutIterationModel, ShortcutLabelModel, ShortcutMemberModel, ShortcutModel, ShortcutStoryModel, ShortcutTaskModel, ShortcutWorkflowModel, ShortcutWorkflowStateModel,
+  ShortcutCommentModel, ShortcutEpicModel, ShortcutIterationModel, ShortcutLabelModel, ShortcutMemberModel, ShortcutModel, ShortcutProjectsModel, ShortcutStoryModel, ShortcutTaskModel, ShortcutWorkflowModel, ShortcutWorkflowStateModel,
 } from '@/models/ShortcutModels';
 import { CommonCommentsModelItem, CommonEpicModel, CommonStoryModel } from '@models/CommonModels';
 
@@ -26,7 +26,15 @@ function cleanText(text: string | undefined): string | undefined {
   return text?.replace(/\[@([^\]]+)\]\(([^)]+)\)/ig, '@$1');
 }
 
-function getEpics({ stories, epics, members }: { stories: ShortcutStoryModel[], epics: ShortcutEpicModel[], members: ShortcutMemberModel[] }): CommonEpicModel[] {
+function getComponents(projectIds: number[], projects: ShortcutProjectsModel[]): string[] {
+  return projects
+    .filter((project: ShortcutProjectsModel) => projectIds.find((epicProjectId: number) => epicProjectId === project.id))
+    .map((project: ShortcutProjectsModel) => project.name);
+}
+
+function getEpics({
+  stories, epics, members, projects,
+}: { stories: ShortcutStoryModel[], epics: ShortcutEpicModel[], members: ShortcutMemberModel[], projects: ShortcutProjectsModel[] }): CommonEpicModel[] {
   return Array.from(new Set(stories.filter((story: ShortcutStoryModel) => story.epic_id).map((story: ShortcutStoryModel) => story.epic_id)))
     .map((epicId: number) => {
       const epicDetails = epics.find((epic: ShortcutEpicModel) => epic.id === epicId);
@@ -40,6 +48,7 @@ function getEpics({ stories, epics, members }: { stories: ShortcutStoryModel[], 
         created: epicDetails.created_at,
         updated: epicDetails.updated_at,
         status: epicDetails.state,
+        components: getComponents(epicDetails.project_ids, projects),
       };
     });
 }
@@ -55,22 +64,24 @@ export function mapComments(comments: ShortcutCommentModel[], members: ShortcutM
 export class ShortcutMapper {
   static async from(data: ShortcutModel): Promise<CommonStoryModel> {
     return {
-      epics: getEpics({ stories: data.stories, members: data.members, epics: data.epics }),
-      stories: data.stories.map((item: ShortcutStoryModel) => ({
-        externalId: item.id,
+      epics: getEpics({
+        stories: data.stories, members: data.members, epics: data.epics, projects: data.projects,
+      }),
+      stories: data.stories.map((story: ShortcutStoryModel) => ({
+        externalId: story.id,
         // externalId: item.external_id,
-        updated: item.updated_at,
-        created: item.created_at,
-        reporter: getMemberEmailAddressById(data.members, item.requested_by_id),
-        comments: mapComments(item.comments, data.members),
-        type: item.story_type,
+        updated: story.updated_at,
+        created: story.created_at,
+        reporter: getMemberEmailAddressById(data.members, story.requested_by_id),
+        comments: mapComments(story.comments, data.members),
+        type: story.story_type,
         // status: item.workflow_state_id,
-        status: getStateNameFromId(data.workflows, item.workflow_id, item.workflow_state_id, item.blocked || item.blocker, item.archived),
-        title: item.name,
-        description: cleanText(item.description) || '',
-        estimate: item.estimate,
-        labels: item.labels?.map((label: ShortcutLabelModel) => label.name),
-        tasks: item.tasks.map((task: ShortcutTaskModel) => ({
+        status: getStateNameFromId(data.workflows, story.workflow_id, story.workflow_state_id, story.blocked || story.blocker, story.archived),
+        title: story.name,
+        description: cleanText(story.description) || '',
+        estimate: story.estimate,
+        labels: story.labels?.map((label: ShortcutLabelModel) => label.name),
+        tasks: story.tasks.map((task: ShortcutTaskModel) => ({
           id: task.id,
           complete: task.complete,
           created: task.created_at,
@@ -79,12 +90,14 @@ export class ShortcutMapper {
           name: task.description,
           description: task.description,
         })),
-        epicId: item.epic_id,
-        sprintId: item.iteration_id,
+        epicId: story.epic_id,
+        sprintId: story.iteration_id,
+        components: getComponents([story.project_id], data.projects),
       })),
       project: {
         name: data.group.name,
         description: cleanText(data.group.description) || '',
+        components: data.projects.map((project: ShortcutProjectsModel) => project.name),
       },
       sprints: (Array.from(new Set(data.stories
         .filter((story: ShortcutStoryModel) => story.iteration_id)

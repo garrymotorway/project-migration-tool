@@ -50,7 +50,15 @@ jest.mock('axios');
   if (url === 'https://api.app.shortcut.com/api/v3/epics') {
     return {
       data: [
-        { id: 4000, name: 'Epic1' },
+        { id: 4000, name: 'Epic 1' },
+      ],
+    };
+  }
+
+  if (url === 'https://api.app.shortcut.com/api/v3/projects') {
+    return {
+      data: [
+        { id: 1234, name: 'Android Seller' },
       ],
     };
   }
@@ -110,10 +118,19 @@ test('gets epics from Shortcut', async () => {
   const dataFromShortcut = await consumer.consume();
   expect(dataFromShortcut.epics).toBeDefined();
   expect(dataFromShortcut.epics.length).toEqual(1);
+  expect(dataFromShortcut.epics[0].name).toEqual('Epic 1');
 });
 
 test('gets iterations (sprints) from Shortcut', async () => {
   const dataFromShortcut = await consumer.consume();
   expect(dataFromShortcut.sprints).toBeDefined();
   expect(dataFromShortcut.sprints.length).toEqual(1);
+  expect(dataFromShortcut.sprints[0].name).toEqual('Dealer 15');
+});
+
+test('gets projects from Shortcut', async () => {
+  const dataFromShortcut = await consumer.consume();
+  expect(dataFromShortcut.projects).toBeDefined();
+  expect(dataFromShortcut.projects.length).toEqual(1);
+  expect(dataFromShortcut.projects[0].name).toEqual('Android Seller');
 });

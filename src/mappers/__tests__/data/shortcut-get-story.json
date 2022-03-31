@@ -161,7 +161,7 @@
   "owner_ids": ["12345678-9012-3456-7890-123456789012"],
   "position": 123,
   "previous_iteration_ids": [123],
-  "project_id": 123,
+  "project_id": 42128,
   "pull_requests": [{
     "branch_id": 123,
     "branch_name": "foo",

@@ -22,7 +22,7 @@ const checkMappingIsPossible = (matchResults: MatchResult[], errorMessageHandler
 
 const findAllDestinationValuesUsingRegexMatching = (stories: any[], map: Record<string, string>, storyItemKey: string): string[] => {
   const storyTypeMatchResults: MatchResult[] = stories.map((story: any) => findSingleDestinationValueUsingRegexMatching(map, story[storyItemKey]));
-  checkMappingIsPossible(storyTypeMatchResults, (badTypes: string) => `Could not map the ${storyItemKey}(es) ${badTypes}`);
+  checkMappingIsPossible(storyTypeMatchResults, (badTypes: string) => `Could not map the ${storyItemKey}(es) ${Array.from(new Set(badTypes))}`);
   return storyTypeMatchResults.map((s: MatchResult) => map[s.match as string]);
 };
 

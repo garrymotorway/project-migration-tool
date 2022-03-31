@@ -113,6 +113,7 @@ async function mapIssues(stories: CommonStoryModelItem[], epics: CommonEpicModel
       author: emailToJiraAccountId(users, comment.author),
       created: comment.created,
     })),
+    components: story.components,
     labels: story.labels,
     customFieldValues: buildCustomFieldValues(story, epics, sprints),
     key: generateIssueId(parseInt(story?.externalId?.toString() || '0', 10)),
@@ -139,6 +140,7 @@ async function mapEpics(epics: CommonEpicModel[], users: any[]): Promise<any> {
         value: epic.name,
       },
     ],
+    components: epic.components,
   }));
 }
 
@@ -150,8 +152,8 @@ function trimmedSummary(summary: string) {
 }
 
 async function mapTasks(stories: CommonStoryModelItem[], users: any[]): Promise<any | string> {
-  return stories.flatMap((story: CommonStoryModelItem) => story.tasks)
-    .map((task: CommonTaskModelItem) => ({
+  return stories.flatMap((story: CommonStoryModelItem) => story.tasks.map((task: CommonTaskModelItem) => ({ story, task })))
+    .map(({ task, story }) => ({
       status: task.complete ? 'Done' : 'To Do',
       reporter: emailToJiraAccountId(users, task.reporter),
       issueType: 'Sub-task',
@@ -161,6 +163,7 @@ async function mapTasks(stories: CommonStoryModelItem[], users: any[]): Promise<
       description: task.description,
       externalId: task.id?.toString(),
       key: generateTaskId(parseInt(task?.id?.toString() || '0', 10)),
+      components: story.components,
     }));
 }
 
@@ -192,6 +195,7 @@ export default class {
         description: fixLinks(data.project.description),
         type: 'software',
         issues: epics.concat(issues.concat(tasks)),
+        components: data.project.components,
       }],
       /*
       // Hack; if JIRA bulk upload doesn't support sprint import

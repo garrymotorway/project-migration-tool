@@ -50,10 +50,12 @@ const data: CommonStoryModel = {
     }],
     epicId: '78393',
     sprintId: 12345,
+    components: ['Frontend', 'Phone'],
   }],
   project: {
     name: 'Project Name',
     description: 'Project description with a [link](http://google.com).',
+    components: ['Backend', 'Frontend', 'Phone'],
   },
   epics: [
     {
@@ -63,6 +65,7 @@ const data: CommonStoryModel = {
       created: '2022-03-21T12:39:57Z',
       updated: '2022-03-21T12:39:57Z',
       status: 'to do',
+      components: ['Backend'],
     },
   ],
   sprints: [
@@ -104,8 +107,16 @@ test('Maps project description', () => {
   expect(mappedData.projects[0].description).toEqual('Project description with a [link|http://google.com].');
 });
 
+test('Maps project components', () => {
+  expect(mappedData.projects[0].components).toEqual(data.project.components);
+});
+
 test('Maps story title to issue title', () => {
   expect(story.summary).toEqual(data.stories[0].title);
+});
+
+test('Maps story components to issue components', () => {
+  expect(story.components).toEqual(data.stories[0].components);
 });
 
 test('Maps story estimate', () => {
@@ -160,6 +171,7 @@ test('Maps tasks and creates the links to parent story', () => {
   expect(task.created).toEqual(data.stories[0].tasks[0].created);
   expect(task.updated).toEqual(data.stories[0].tasks[0].updated);
   expect(task.externalId).toEqual(data.stories[0].tasks[0].id?.toString());
+  expect(task.components).toEqual(data.stories[0].components);
 
   expect(link).toBeDefined();
   expect(link.name).toEqual(data.stories[0].tasks[0].description.split('\n')[0]);
@@ -187,6 +199,7 @@ test('Adds epics to issues', () => {
     fieldType: 'com.pyxis.greenhopper.jira:gh-epic-link',
     value: epic.key,
   });
+  expect(epic.components).toEqual(data.epics[0].components);
 });
 
 test('Links epic to story', () => {

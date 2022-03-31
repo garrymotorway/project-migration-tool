@@ -6,6 +6,7 @@ const shortcutMemberData = require('./data/shortcut-members.json');
 const workflowData = require('./data/workflow-data.json');
 const epicData = require('./data/epic-data.json');
 const sprintData = require('./data/sprint-data.json');
+const projectsData = require('./data/shortcut-projects.json');
 
 const data: any = {
   stories: [shortcutGetStoryData],
@@ -14,6 +15,7 @@ const data: any = {
   workflows: workflowData,
   epics: epicData,
   sprints: sprintData,
+  projects: projectsData,
 };
 
 let mappedData: any;
@@ -28,6 +30,10 @@ test('Maps project name', () => {
 
 test('Maps project description', () => {
   expect(mappedData.project.description).toEqual(data.group.description);
+});
+
+test('Maps project components', () => {
+  expect(mappedData.project.components).toEqual(['Android Seller', 'iPhone Seller', 'Blackberry Seller']);
 });
 
 test('Maps story external Id', () => {
@@ -67,8 +73,12 @@ test('Maps story description', () => {
   expect(mappedData.stories[0].description).toEqual('this is a description of my story for @garry with screenshot ![Screenshot 2022-03-21 at 14.25.43.png](https://media.app.shortcut.com/api/attachments/files/clubhouse-assets/file.png).');
 });
 
-test('Maps status', () => {
+test('Maps story status', () => {
   expect(mappedData.stories[0].status).toEqual('Ready for Development');
+});
+
+test('Maps story components', () => {
+  expect(mappedData.stories[0].components).toEqual(['Android Seller']);
 });
 
 test('Maps epic id', () => {
@@ -141,6 +151,7 @@ test('Maps epic', () => {
   expect(mappedData.epics[0].status).toEqual(data.epics[0].state);
   expect(mappedData.epics[0].created).toEqual(data.epics[0].created_at);
   expect(mappedData.epics[0].updated).toEqual(data.epics[0].updated_at);
+  expect(mappedData.epics[0].components).toEqual(['iPhone Seller', 'Blackberry Seller']);
 });
 
 test('Maps sprints', () => {

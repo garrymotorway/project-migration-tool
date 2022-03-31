@@ -1,6 +1,7 @@
 export interface CommonProject {
   name: string;
   description: string;
+  components: string[];
 }
 
 export interface CommonStoryModel {
@@ -41,6 +42,7 @@ export interface CommonStoryModelItem {
   labels: string[];
   epicId?: string | number;
   sprintId?: string | number;
+  components: string[];
 }
 
 export interface CommonEpicModel {
@@ -50,6 +52,7 @@ export interface CommonEpicModel {
   created: string;
   updated: string;
   status: string | number;
+  components: string[];
 }
 
 export interface CommonSprintModel {
