@@ -7,7 +7,8 @@ This is a project (WIP) to take stories from Shortcut and move them into JIRA us
 ## Pre-reqs
 
 * Must have a target project setup in JIRA
-* Must have a sprint board setup in JIRA (the ID in the url is the rapid view ID).
+* Must have a board setup in JIRA (the ID in the url is the rapid view ID). In JIRA this is achieved as follows (if it doesn't exist already)
+  * Board (pulldown) > Create Board > Scrum > Board from an existing project > Enter a name > Create board.
 * You must map statuses in Shortcut to the desired statuses in JIRA; this is currently hard-coded in ./src/mappers/getStatusMap.ts; the Shortcut side uses a regular expression to match, so you can use wildcards etc for fuzzy matching. Every status from Shortcut must be mappable.
 
 ## To run
