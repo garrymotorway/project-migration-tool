@@ -23,6 +23,9 @@ export interface ShortcutStoryModel {
   workflow_state_id: number;
   epic_id: number;
   iteration_id: number;
+  archived: boolean;
+  blocked: boolean;
+  blocker: boolean;
 }
 
 export interface ShortcutLabelModel {

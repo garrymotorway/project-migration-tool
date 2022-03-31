@@ -15,5 +15,6 @@ export default function getStatusMap() {
     'Testing': 'TESTING',
     'Done': 'Closed',
     '.*Design phase.*': 'In Progress',
+    'Archived': 'Closed', // This is auto assigned as the state if shortcut story is archived=true
   };
 }

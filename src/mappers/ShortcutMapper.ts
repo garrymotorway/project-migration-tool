@@ -7,10 +7,16 @@ function getMemberEmailAddressById(members: ShortcutMemberModel[], id: string): 
   return members.find((member: ShortcutMemberModel) => member.id === id)?.profile.email_address || id;
 }
 
-export function getStateNameFromId(workflows: ShortcutWorkflowModel[], workflowId: number, workflowStateId: number) : string | number {
+export function getStateNameFromId(workflows: ShortcutWorkflowModel[], workflowId: number, workflowStateId: number, blocked: boolean, archived: boolean) : string | number {
   const thisWorkflow = workflows.find((workflow: ShortcutWorkflowModel) => workflow.id === workflowId);
-  const thisState = thisWorkflow?.states.find((state: ShortcutWorkflowStateModel) => state.id === workflowStateId);
-  return thisState?.name || workflowStateId;
+  let thisState = thisWorkflow?.states.find((state: ShortcutWorkflowStateModel) => state.id === workflowStateId)?.name;
+  if (blocked) {
+    thisState = 'Blocked';
+  }
+  if (archived) {
+    thisState = 'Archived';
+  }
+  return thisState || workflowStateId;
 }
 
 function cleanText(text: string | undefined): string | undefined {
@@ -59,7 +65,7 @@ export class ShortcutMapper {
         comments: mapComments(item.comments, data.members),
         type: item.story_type,
         // status: item.workflow_state_id,
-        status: getStateNameFromId(data.workflows, item.workflow_id, item.workflow_state_id),
+        status: getStateNameFromId(data.workflows, item.workflow_id, item.workflow_state_id, item.blocked || item.blocker, item.archived),
         title: item.name,
         description: cleanText(item.description) || '',
         estimate: item.estimate,

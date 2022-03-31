@@ -85,7 +85,25 @@ test('Uses status Id if status cannot be mapped', () => {
     states: [
       { id: 5001, name: 'Dont use this' },
     ],
-  }], 1000, 5002)).toEqual(5002);
+  }], 1000, 5002, false, false)).toEqual(5002);
+});
+
+test('Uses \'Archived\' if story is marked as archived (overriding blocked)', () => {
+  expect(getStateNameFromId([{
+    id: 1000,
+    states: [
+      { id: 5001, name: 'Dont use this' },
+    ],
+  }], 1000, 5002, true, true)).toEqual('Archived');
+});
+
+test('Uses \'Blocked\' if story is marked as blocked but not archived', () => {
+  expect(getStateNameFromId([{
+    id: 1000,
+    states: [
+      { id: 5001, name: 'Dont use this' },
+    ],
+  }], 1000, 5002, true, false)).toEqual('Blocked');
 });
 
 test('Maps story comments', () => {
