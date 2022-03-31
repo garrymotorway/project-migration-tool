@@ -1,4 +1,6 @@
-import { ShortcutMapper, getStateNameFromId, mapComments } from '@mappers/ShortcutMapper';
+import {
+  ShortcutMapper, getStateNameFromId, mapComments, getTaskCompleted,
+} from '@mappers/ShortcutMapper';
 
 const shortcutGetStoryData = require('./data/shortcut-get-story.json');
 const shortcutGroupData = require('./data/shortcut-group.json');
@@ -135,13 +137,26 @@ test('Maps story tasks', () => {
   expect(mappedData.stories[0].tasks).not.toBeUndefined();
   expect(mappedData.stories[0].tasks).toHaveLength(1);
   expect(mappedData.stories[0].tasks[0].id).toEqual(data.stories[0].tasks[0].id);
-  expect(mappedData.stories[0].tasks[0].complete).toEqual(data.stories[0].tasks[0].complete);
+  expect(mappedData.stories[0].tasks[0].complete).toEqual(data.stories[0].completed);
   expect(mappedData.stories[0].tasks[0].created).toEqual(data.stories[0].tasks[0].created_at);
   expect(mappedData.stories[0].tasks[0].updated).toEqual(data.stories[0].tasks[0].updated_at);
   expect(mappedData.stories[0].tasks[0].reporter).toEqual(data.stories[0].tasks[0].reporter);
   expect(mappedData.stories[0].tasks[0].name).toEqual(data.stories[0].tasks[0].description);
   expect(mappedData.stories[0].tasks[0].description).toEqual(data.stories[0].tasks[0].description);
 });
+
+test('Task is marked completed if story is completed', () => {
+  expect(getTaskCompleted(false, true)).toBeTruthy();
+});
+
+test('Task is marked completed if task is completed and story is not completed', () => {
+  expect(getTaskCompleted(true, false)).toBeTruthy();
+});
+
+test('Task is marked not completed if task is not completed and story is not completed', () => {
+  expect(getTaskCompleted(false, false)).toBeFalsy();
+});
+
 test('Maps epic', () => {
   expect(mappedData.epics).not.toBeUndefined();
   expect(mappedData.epics).toHaveLength(1);

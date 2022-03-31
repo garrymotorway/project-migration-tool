@@ -61,6 +61,10 @@ export function mapComments(comments: ShortcutCommentModel[], members: ShortcutM
   }));
 }
 
+export function getTaskCompleted(taskCompleted: boolean, storyCompleted: boolean): boolean {
+  return taskCompleted || storyCompleted;
+}
+
 export class ShortcutMapper {
   static async from(data: ShortcutModel): Promise<CommonStoryModel> {
     return {
@@ -83,7 +87,7 @@ export class ShortcutMapper {
         labels: story.labels?.map((label: ShortcutLabelModel) => label.name),
         tasks: story.tasks.map((task: ShortcutTaskModel) => ({
           id: task.id,
-          complete: task.complete,
+          complete: getTaskCompleted(task.complete, story.completed),
           created: task.created_at,
           updated: task.updated_at,
           reporter: getMemberEmailAddressById(data.members, task.requested_by_id),
