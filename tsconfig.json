@@ -1,33 +1,45 @@
 {
-    "compilerOptions": {
-        "module": "commonjs",
-        "target": "ES2021",
-        "lib": ["ES2021"],
-        "esModuleInterop": true,
-        "strict": true,
-        "outDir": "dist",
-        "baseUrl": "./src",
-        "moduleResolution": "node",
-        "resolveJsonModule": true,
-        "paths": {
-          "@/*" : ["*"],
-          "@consumers/*": ["consumers/*"],
-          "@producers/*": ["producers/*"],
-          "@mappers/*": ["mappers/*"],
-          "@enums/*": ["enums/*"],
-          "@models/*": ["models/*"]
-        }
-    },
-    "include": [
-        "./**/*.ts",
-        "./**/*.mts",
-        "./**/*.js",
-        "./**/*.mjs"
-, "test/setupTests"      ],
-    "exclude": [
-        "node_modules",
-        "**/__tests__/*",
-        "**/__mocks__/*",
-        "*test*"
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES2021",
+    "lib": [
+      "ES2021"
+    ],
+    "esModuleInterop": true,
+    "strict": true,
+    "outDir": "dist",
+    "baseUrl": "./src",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "paths": {
+      "@/*": [
+        "*"
+      ],
+      "@consumers/*": [
+        "consumers/*"
+      ],
+      "@producers/*": [
+        "producers/*"
+      ],
+      "@mappers/*": [
+        "mappers/*"
+      ],
+      "@enums/*": [
+        "enums/*"
+      ],
+      "@models/*": [
+        "models/*"
       ]
+    }
+  },
+  "include": [
+    "./**/*.ts",
+    "./**/*.mts",
+    "./**/*.js",
+    "./**/*.mjs",
+    "test/setupTests"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

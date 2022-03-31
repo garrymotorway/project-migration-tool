@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "CONSUMER_TOKEN=he3l0 CONSUMER_BOARD_ID=CON123 PRODUCER_BOARD_ID=HOTT PRODUCER_BOARD_RAPID_VIEW_ID=7 PRODUCER_TOKEN=aby3 jest",
-    "build": "rm -rf dist && tsc",
+    "build": "rm -rf dist && tsc -p tsconfig-build.json",
     "start": "npm run build && node ./run-test.js",
     "lint": "eslint ."
   },

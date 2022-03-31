@@ -38,6 +38,7 @@
   ],
   "rules": {
     "max-len":"off",
-    "quote-props": "off"
+    "quote-props": "off",
+    "class-methods-use-this": "warn"
   }
 }
