@@ -16,13 +16,13 @@ const checkMappingIsPossible = (matchResults: MatchResult[], errorMessageHandler
     .filter((typeMatchResult: MatchResult) => typeMatchResult.nomatch)
     .map((typeMatchResult: MatchResult) => typeMatchResult.nomatch);
   if (badItems.length) {
-    throw new Error(errorMessageHandler(JSON.stringify(badItems)));
+    throw new Error(errorMessageHandler(JSON.stringify(Array.from(new Set(badItems)))));
   }
 };
 
 const findAllDestinationValuesUsingRegexMatching = (stories: any[], map: Record<string, string>, storyItemKey: string): string[] => {
   const storyTypeMatchResults: MatchResult[] = stories.map((story: any) => findSingleDestinationValueUsingRegexMatching(map, story[storyItemKey]));
-  checkMappingIsPossible(storyTypeMatchResults, (badTypes: string) => `Could not map the ${storyItemKey}(es) ${Array.from(new Set(badTypes))}`);
+  checkMappingIsPossible(storyTypeMatchResults, (badValues: string) => `Could not map the ${storyItemKey}(es) ${badValues}`);
   return storyTypeMatchResults.map((s: MatchResult) => map[s.match as string]);
 };
 
