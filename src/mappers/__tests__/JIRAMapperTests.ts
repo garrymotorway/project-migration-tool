@@ -1,5 +1,5 @@
-import JIRAMapper, { getSprintStatus, generateEpicId } from '@mappers/JIRAMapper';
-import { CommonModel, CommonSprintModel } from '@models/CommonModels';
+import JIRAMapper, { getSprintStatus, generateEpicId, mapTasks } from '@mappers/JIRAMapper';
+import { CommonModel, CommonSprintModel, CommonStoryModelItem } from '@models/CommonModels';
 import axios, { AxiosRequestConfig } from 'axios';
 
 jest.mock('axios');
@@ -166,27 +166,43 @@ test('Maps story points', () => {
 test('Maps comments', () => {
   expect(story.comments).toBeDefined();
   expect(story.comments[0]).toBeDefined();
-  expect(story.comments[0].body).toEqual('[@huwrose|shortcutapp://members/5dc00b1d-aa52-4a44-a0d9-4182ef9f9be6] hello and you [@john|shortcutapp://members/5dc00b1d-aa52-4a44-a0d9-4182ef9f9be7] how are you. Also [@johnSmith|shortcutapp://members/5dc00b1d-aa52-4a44-a0d9-4182ef9f9be8]');
-  expect(story.comments[0].author).toEqual('abc123');
-  expect(story.comments[0].created).toEqual(data.stories[0].comments[0].created);
+  expect(story.comments[0]).toEqual({
+    body: '[@huwrose|shortcutapp://members/5dc00b1d-aa52-4a44-a0d9-4182ef9f9be6] hello and you [@john|shortcutapp://members/5dc00b1d-aa52-4a44-a0d9-4182ef9f9be7] how are you. Also [@johnSmith|shortcutapp://members/5dc00b1d-aa52-4a44-a0d9-4182ef9f9be8]',
+    author: 'abc123',
+    created: data.stories[0].comments[0].created,
+  });
 });
 
-test('Maps tasks and creates the links to parent story', () => {
-  expect(task).toBeDefined();
-  expect(task.status).toEqual('To Do');
-  expect(task.reporter).toEqual('abc456');
-  expect(task.summary).toEqual(`${data.stories[0].tasks[0].name.substring(0, 252)}...`);
-  expect(task.description).toEqual(data.stories[0].tasks[0].description);
-  expect(task.issueType).toEqual('Sub-task');
-  expect(task.created).toEqual(data.stories[0].tasks[0].created);
-  expect(task.updated).toEqual(data.stories[0].tasks[0].updated);
-  expect(task.externalId).toEqual(data.stories[0].tasks[0].id?.toString());
-  expect(task.components).toEqual(data.stories[0].components);
+describe('Tasks', () => {
+  let storyWithTasks: CommonStoryModelItem;
+  beforeEach(() => {
+    storyWithTasks = Object.assign(data.stories[0], {});
+  });
 
-  expect(link).toBeDefined();
-  expect(link.name).toEqual(data.stories[0].tasks[0].description.split('\n')[0]);
-  expect(link.sourceId).toEqual(data.stories[0].tasks[0].id?.toString());
-  expect(link.destinationId).toEqual(data.stories[0].externalId);
+  test('Maps tasks and creates the links to parent story', () => {
+    expect(task).toEqual({
+      status: 'To Do',
+      reporter: 'abc456',
+      summary: `${data.stories[0].tasks[0].name.substring(0, 252)}...`,
+      description: data.stories[0].tasks[0].description,
+      issueType: 'Sub-task',
+      created: data.stories[0].tasks[0].created,
+      updated: data.stories[0].tasks[0].updated,
+      externalId: data.stories[0].tasks[0].id?.toString(),
+      components: data.stories[0].components,
+      key: 'HOTT-1201234',
+    });
+    expect(link).toEqual({
+      name: data.stories[0].tasks[0].description.split('\n')[0],
+      sourceId: data.stories[0].tasks[0].id?.toString(),
+      destinationId: data.stories[0].externalId,
+    });
+  });
+
+  test('Ignores tasks with blank names', async () => {
+    storyWithTasks.tasks[0].name = '';
+    expect(await mapTasks([storyWithTasks], [], 'HABC')).toHaveLength(0);
+  });
 });
 
 test('Adds epics to issues', () => {

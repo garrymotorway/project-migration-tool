@@ -143,8 +143,8 @@ function trimmedSummary(summary: string) {
   // return summary.split('\n')[0].replace(regexToFindTheLastSpaceBeforeTheLimitForSummaryAndTrimAllCharactersBeyondIt, '$1');
 }
 
-async function mapTasks(stories: CommonStoryModelItem[], users: any[], projectId: string): Promise<any | string> {
-  return stories.flatMap((story: CommonStoryModelItem) => story.tasks.map((task: CommonTaskModelItem) => ({ story, task })))
+export async function mapTasks(stories: CommonStoryModelItem[], users: any[], projectId: string): Promise<any[]> {
+  return stories.flatMap((story: CommonStoryModelItem) => story.tasks.filter((task: CommonTaskModelItem) => task.name && task.name.length > 0).map((task: CommonTaskModelItem) => ({ story, task })))
     .map(({ task, story }) => ({
       status: task.complete ? 'Done' : 'To Do',
       reporter: emailToJiraAccountId(users, task.reporter),
