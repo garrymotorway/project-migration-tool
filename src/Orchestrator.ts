@@ -1,10 +1,11 @@
 import Consumer from '@consumers/Consumer';
 import Producer from '@producers/Producer';
-import Mapper from '@mappers/Mapper';
+import { Mapper } from '@mappers/Mapper';
 
 import ConsumerFactory from '@consumers/ConsumerFactory';
 import ProducerFactory from '@producers/ProducerFactory';
 import MapperFactory from '@mappers/MapperFactory';
+import { Config } from '@models/Config';
 
 export default class Orchestrator {
   private mapper: Mapper<any, any>;
@@ -13,16 +14,16 @@ export default class Orchestrator {
 
   private producer: Producer;
 
-  constructor(consumerName: string, producerName: string) {
-    this.mapper = MapperFactory.create(consumerName, producerName);
-    this.consumer = ConsumerFactory.create(consumerName);
-    this.producer = ProducerFactory.create(producerName);
+  constructor(config: Config) {
+    this.mapper = MapperFactory.create(config);
+    this.consumer = ConsumerFactory.create(config.source.name, config.source.projectId);
+    this.producer = ProducerFactory.create(config.destination.name);
   }
 
   async run() {
     const data = await this.consumer.consume();
-    const mappedFromSource = await this.mapper.from(data);
-    const mappedToDest = await this.mapper.to(mappedFromSource);
+    const mappedFromSource = await this.mapper.sourceMapper.from(data);
+    const mappedToDest = await this.mapper.destinationMapper.to(mappedFromSource);
     await this.producer.produce(mappedToDest);
   }
 }

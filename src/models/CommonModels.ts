@@ -1,14 +1,14 @@
-export interface CommonProject {
+export interface CommonModel {
+  stories: CommonStoryModelItem[];
+  project: CommonProjectModel;
+  epics: CommonEpicModel[];
+  sprints: CommonSprintModel[];
+}
+
+export interface CommonProjectModel {
   name: string;
   description: string;
   components: string[];
-}
-
-export interface CommonStoryModel {
-  stories: CommonStoryModelItem[];
-  project: CommonProject;
-  epics: CommonEpicModel[];
-  sprints: CommonSprintModel[];
 }
 
 export interface CommonCommentsModelItem {

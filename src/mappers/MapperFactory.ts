@@ -1,27 +1,29 @@
 import { ShortcutMapper } from '@/mappers/ShortcutMapper';
-import Mapper from '@mappers/Mapper';
+import { DestinationMapper, Mapper, SourceMapper } from '@mappers/Mapper';
 import { SHORTCUT, JIRA } from '@enums/ProjectManagementSystems';
+import { ShortcutModel } from '@/models/ShortcutModels';
+import { Config } from '@/models/Config';
 import JIRAMapper from './JIRAMapper';
 
-function getSourceMapper(sourceName: string): (data: any) => any {
-  if (sourceName.toLowerCase() === SHORTCUT.toLowerCase()) {
-    return ShortcutMapper.from;
+function getSourceMapper(config: Config): SourceMapper<ShortcutModel> {
+  if (config.source.name.toLowerCase() === SHORTCUT.toLowerCase()) {
+    return new ShortcutMapper();
   }
-  throw new Error(`Could not create a mapper with source ${sourceName}.`);
+  throw new Error(`Could not create a mapper with source ${config.source.name}.`);
 }
 
-function getDestMapper(destName: string): (data: any) => any {
-  if (destName.toLowerCase() === JIRA.toLowerCase()) {
-    return JIRAMapper.to;
+function getDestMapper(config: Config): DestinationMapper<any> {
+  if (config.destination.name.toLowerCase() === JIRA.toLowerCase()) {
+    return new JIRAMapper(config.statusMap, config.issueTypeMap, config.destination.projectId, config.destination.boardId);
   }
-  throw new Error(`Could not create a mapper with destination ${destName}.`);
+  throw new Error(`Could not create a mapper with destination ${config.destination.name}.`);
 }
 
 export default class MapperFactory {
-  static create(sourceName: string, destName: string): Mapper<any, any> {
+  static create(config: Config): Mapper<any, any> {
     return {
-      from: getSourceMapper(sourceName),
-      to: getDestMapper(destName),
+      sourceMapper: getSourceMapper(config),
+      destinationMapper: getDestMapper(config),
     };
   }
 }

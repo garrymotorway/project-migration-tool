@@ -21,19 +21,64 @@ in this example add this code to index.js
 ```javascript
 const PMT = require("../project-migration-tool");
 
-process.env.CONSUMER_BOARD_ID = 'group-id';
 process.env.CONSUMER_TOKEN = 'abc'; // An API key created on the source side (e.g. Shortcut)
-process.env.PRODUCER_BOARD_ID = 'HOT';
 process.env.PRODUCER_TOKEN = 'def'; // An API key created on the destination side (e.g. JIRA)
-process.env.PRODUCER_BOARD_RAPID_VIEW_ID = 7; // Board ID (in JIRA find this in the URL after setting up a sprint board)
 process.env.SAMPLE = 10; // Optional - can be used to try a sample first. Will get all data if omitted.
 process.env.DEFAULT_REPORTER = 'garry@motorway.co.uk'; // Optional - if reporter doesn't exist in JIRA this will be used (set it to the go-to person in your team for backlog refinement, e.g. Agile lead). If this isn't specified the account of the person doing the import is used by JIRA
 process.env.DEST_SEED=1000000 // This assists with preventing ID clashing in existing projects. Make it higher than the highest issue number in your existing project (which could just be 0 for a fresh project).
 
 (async function () {
-  await PMT.default('shortcut', 'jira');
+  await PMT.default(require('./config.json'));
 }());
 ```
+
+The config provides all the information needed to map from a source to a destination. An example is this
+
+```
+{
+    "source": {
+        "name": "shortcut",
+        "projectId": "abddsd343782ihds7c"
+    },
+    "destination": {
+        "name": "jira",
+        "projectId": "HOT",
+        "boardId": 7
+    },
+    "statusMap": {
+        "Archived": "Closed",
+        "Backlog": "To Do",
+        "Ready for Development": "To Do",
+        "Blocked": "BLOCKED",
+        "In Development": "In Progress",
+        "Code Review": "PEER REVIEW",
+        ".*QA.*": "TESTING",
+        ".*Merged.*": "MERGED",
+        ".*Shipped.*": "SHIPPED",
+        "Ready to Start": "To Do",
+        "To do": "To Do",
+        "In Progress": "In Progress",
+        "Peer Review": "PEER REVIEW",
+        "Testing": "TESTING",
+        "Done": "Closed",
+        ".*Design phase.*": "In Progress"
+    },
+    "issueTypeMap": {
+        "chore": "Task",
+        "bug": "Bug",
+        "feature": "Story"
+    }
+}
+```
+
+* `source` Contains name of the data source and the projectId
+* `destination` Contains the name of the destination and the projectId and a boardId (if applicable, e.g. in JIRA)
+* `statusMap` a mapping of statuses from the source to the destination (in JIRA workflow must be setup in advance)
+* `issueTypeMap` if the destination system supports multiple types of issue, this allows you to map the issue type from the source to an issue type in the destination (example shows Shortcut => JIRA)
+
+Currently supported source/destinations are
+* jira
+* shortcut
 
 From a terminal window run like this
 

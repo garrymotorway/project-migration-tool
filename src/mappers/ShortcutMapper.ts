@@ -1,7 +1,8 @@
 import {
   ShortcutCommentModel, ShortcutEpicModel, ShortcutIterationModel, ShortcutLabelModel, ShortcutMemberModel, ShortcutModel, ShortcutProjectsModel, ShortcutStoryModel, ShortcutTaskModel, ShortcutWorkflowModel, ShortcutWorkflowStateModel,
 } from '@/models/ShortcutModels';
-import { CommonCommentsModelItem, CommonEpicModel, CommonStoryModel } from '@models/CommonModels';
+import { CommonCommentsModelItem, CommonEpicModel, CommonModel } from '@models/CommonModels';
+import { SourceMapper } from './Mapper';
 
 function getMemberEmailAddressById(members: ShortcutMemberModel[], id: string): string {
   return members.find((member: ShortcutMemberModel) => member.id === id)?.profile.email_address || id;
@@ -65,8 +66,8 @@ export function getTaskCompleted(taskCompleted: boolean, storyCompleted: boolean
   return taskCompleted || storyCompleted;
 }
 
-export class ShortcutMapper {
-  static async from(data: ShortcutModel): Promise<CommonStoryModel> {
+export class ShortcutMapper implements SourceMapper<ShortcutModel> {
+  async from(data: ShortcutModel): Promise<CommonModel> {
     return {
       epics: getEpics({
         stories: data.stories, members: data.members, epics: data.epics, projects: data.projects,
@@ -120,9 +121,5 @@ export class ShortcutMapper {
           };
         }),
     };
-  }
-
-  static async to(/* data: CommonStoryModel */): Promise<any> {
-    throw new Error('Not implemented');
   }
 }

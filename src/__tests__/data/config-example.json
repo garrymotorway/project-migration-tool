@@ -1,0 +1,21 @@
+{
+    "source": {
+        "name": "shortcut",
+        "projectId": "12345"
+    },
+    "destination": {
+        "name": "jira",
+        "projectId": "abcde",
+        "boardId": 99
+    },
+    "statusMap": {
+        "Archived": "Closed",
+        ".*merged.*": "MERGED",
+        ".*": "To Do"
+    },
+    "issueTypeMap": {
+        "chore": "Task",
+        "bug": "Bug",
+        "feature": "Story"
+    }
+}

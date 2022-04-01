@@ -23,7 +23,7 @@ const data: any = {
 let mappedData: any;
 
 beforeEach(async () => {
-  mappedData = await ShortcutMapper.from(data);
+  mappedData = await new ShortcutMapper().from(data);
 });
 
 test('Maps project name', () => {

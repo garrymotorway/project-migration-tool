@@ -1,8 +1,11 @@
 import JIRAMapper, { getSprintStatus, generateEpicId } from '@mappers/JIRAMapper';
-import { CommonStoryModel, CommonSprintModel } from '@models/CommonModels';
+import { CommonModel, CommonSprintModel } from '@models/CommonModels';
 import axios, { AxiosRequestConfig } from 'axios';
 
 jest.mock('axios');
+
+const projectId = 'HOTT';
+const boardId = 99;
 
 (axios.get as unknown as jest.Mock).mockImplementation(async (url: string, requestConfig: AxiosRequestConfig) => {
   if (requestConfig.headers?.Authorization !== `Basic ${process.env.PRODUCER_TOKEN}`) {
@@ -20,7 +23,7 @@ jest.mock('axios');
   throw new Error(`No mock for URL ${url}`);
 });
 
-const data: CommonStoryModel = {
+const data: CommonModel = {
   stories: [{
     externalId: '123',
     status: 'Has been mergeD',
@@ -86,17 +89,24 @@ let task: any;
 let link: any;
 
 beforeAll(async () => {
-  mappedData = await JIRAMapper.to(data);
+  mappedData = await new JIRAMapper({
+    '.*merGeD.*': 'MERGED',
+    '.*': 'To Do',
+  }, {
+    'chore': 'Task',
+    'bug': 'Bug',
+    'feature': 'Story',
+  }, projectId, boardId).to(data);
   [epic, story, task] = mappedData.projects[0].issues;
   [link] = mappedData.links;
 });
 
 test('Maps project external ID', () => {
-  expect(mappedData.projects[0].id).toEqual(process.env.PRODUCER_BOARD_ID);
+  expect(mappedData.projects[0].id).toEqual(projectId);
 });
 
 test('Maps project key', () => {
-  expect(mappedData.projects[0].key).toEqual(process.env.PRODUCER_BOARD_ID);
+  expect(mappedData.projects[0].key).toEqual(projectId);
 });
 
 test('Maps project name', () => {
@@ -182,7 +192,7 @@ test('Maps tasks and creates the links to parent story', () => {
 test('Adds epics to issues', () => {
   expect(epic).toBeDefined();
   expect(epic.status).toEqual('To Do');
-  expect(epic.key).toEqual(generateEpicId(+data.epics[0].id));
+  expect(epic.key).toEqual(generateEpicId(+data.epics[0].id, projectId));
   expect(epic.reporter).toEqual('abc456');
   expect(epic.summary).toEqual(data.epics[0].name);
   expect(epic.issueType).toEqual('Epic');
@@ -206,7 +216,7 @@ test('Links epic to story', () => {
   expect(story.customFieldValues).toContainEqual({
     fieldName: 'Epic Link',
     fieldType: 'com.pyxis.greenhopper.jira:gh-epic-link',
-    value: generateEpicId(+data.epics[0].id),
+    value: generateEpicId(+data.epics[0].id, projectId),
   });
 });
 
@@ -216,7 +226,7 @@ test('Links sprint to story', () => {
   expect(customFieldValue.fieldName).toEqual('Sprint');
   expect(customFieldValue.fieldType).toEqual('com.pyxis.greenhopper.jira:gh-sprint');
   expect(customFieldValue.value).toEqual([{
-    rapidViewId: parseInt(process.env.PRODUCER_BOARD_RAPID_VIEW_ID || '0', 10),
+    rapidViewId: boardId,
     state: 'CLOSED',
     startDate: data.sprints[0].start,
     endDate: data.sprints[0].end,

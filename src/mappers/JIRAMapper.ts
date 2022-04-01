@@ -1,13 +1,9 @@
 import {
-  CommonCommentsModelItem, CommonEpicModel, CommonSprintModel, CommonStoryModel, CommonStoryModelItem, CommonTaskModelItem,
+  CommonCommentsModelItem, CommonEpicModel, CommonSprintModel, CommonModel, CommonStoryModelItem, CommonTaskModelItem,
 } from '@models/CommonModels';
 import findAllDestinationValuesUsingRegexMatching from '@mappers/RegexMapperUtils';
-import getStatusMap from '@mappers/getStatusMap';
-import getTypeMap from '@mappers/getTypeMap';
 import axios from 'axios';
-
-const typeMap: Record<string, string> = getTypeMap();
-const statusMap: Record<string, string> = getStatusMap();
+import { DestinationMapper } from './Mapper';
 
 // Ensure [text](url) links are JIRA-formatted
 // Images are replaced with links
@@ -15,16 +11,16 @@ function fixLinks(text: string) {
   return text?.replace(/!?\[([^\]]+)\]\(([^)]+)\)/ig, '[$1|$2]');
 }
 
-export function generateEpicId(epicIndex: number) {
-  return `${process.env.PRODUCER_BOARD_ID}-${epicIndex + parseInt(process.env.DEST_SEED || '1000000', 10) + 50000}`;
+export function generateEpicId(epicIndex: number, projectId: string) {
+  return `${projectId}-${epicIndex + parseInt(process.env.DEST_SEED || '1000000', 10) + 50000}`;
 }
 
-export function generateIssueId(issueIndex: number) {
-  return `${process.env.PRODUCER_BOARD_ID}-${issueIndex + parseInt(process.env.DEST_SEED || '1000000', 10) + 100000}`;
+export function generateIssueId(issueIndex: number, projectId: string) {
+  return `${projectId}-${issueIndex + parseInt(process.env.DEST_SEED || '1000000', 10) + 100000}`;
 }
 
-export function generateTaskId(issueIndex: number) {
-  return `${process.env.PRODUCER_BOARD_ID}-${issueIndex + parseInt(process.env.DEST_SEED || '1000000', 10) + 200000}`;
+export function generateTaskId(issueIndex: number, projectId: string) {
+  return `${projectId}-${issueIndex + parseInt(process.env.DEST_SEED || '1000000', 10) + 200000}`;
 }
 
 export function getSprintStatus(sprint: CommonSprintModel) {
@@ -50,7 +46,7 @@ function emailToJiraAccountId(users: any[], email: string) {
   return (locatedUser && locatedUser.accountId) || email;
 }
 
-function buildCustomFieldValues(story: CommonStoryModelItem, epics: CommonEpicModel[], sprints: CommonSprintModel[]) {
+function buildCustomFieldValues(story: CommonStoryModelItem, epics: CommonEpicModel[], sprints: CommonSprintModel[], projectId: string, rapidViewId: number) {
   const result = [];
   if (story.estimate) {
     result.push({
@@ -63,14 +59,10 @@ function buildCustomFieldValues(story: CommonStoryModelItem, epics: CommonEpicMo
     result.push({
       fieldName: 'Epic Link',
       fieldType: 'com.pyxis.greenhopper.jira:gh-epic-link',
-      value: generateEpicId(+story.epicId),
+      value: generateEpicId(+story.epicId, projectId),
     });
   }
   if (story.sprintId) {
-    const rapidViewId = parseInt(process.env.PRODUCER_BOARD_RAPID_VIEW_ID || '0', 10);
-    if (Number.isNaN(rapidViewId) || rapidViewId < 1) {
-      throw new Error('Could not set rapidViewId. Ensure environment variable PRODUCER_BOARD_RAPID_VIEW_ID is set to an integer value.');
-    }
     const thisSprint = sprints.find((sprint: CommonSprintModel) => sprint.id === story.sprintId);
     if (!thisSprint) {
       throw new Error(`Could not find sprint data for sprint id ${story.sprintId}`);
@@ -94,7 +86,7 @@ function buildCustomFieldValues(story: CommonStoryModelItem, epics: CommonEpicMo
   return result;
 }
 
-async function mapIssues(stories: CommonStoryModelItem[], epics: CommonEpicModel[], sprints: CommonSprintModel[], users: any[]): Promise<any> {
+async function mapIssues(stories: CommonStoryModelItem[], epics: CommonEpicModel[], sprints: CommonSprintModel[], users: any[], statusMap: Record<string, string>, typeMap: Record<string, string>, projectId: string, boardId: number): Promise<any> {
   const storyStatuses = findAllDestinationValuesUsingRegexMatching(stories, statusMap, 'status');
   const storyTypes = findAllDestinationValuesUsingRegexMatching(stories, typeMap, 'type');
 
@@ -115,18 +107,18 @@ async function mapIssues(stories: CommonStoryModelItem[], epics: CommonEpicModel
     })),
     components: story.components,
     labels: story.labels,
-    customFieldValues: buildCustomFieldValues(story, epics, sprints),
-    key: generateIssueId(parseInt(story?.externalId?.toString() || '0', 10)),
+    customFieldValues: buildCustomFieldValues(story, epics, sprints, projectId, boardId),
+    key: generateIssueId(parseInt(story?.externalId?.toString() || '0', 10), projectId),
   }));
   return issues;
 }
 
-async function mapEpics(epics: CommonEpicModel[], users: any[]): Promise<any> {
+async function mapEpics(epics: CommonEpicModel[], users: any[], statusMap: Record<string, string>, projectId: string): Promise<any> {
   const epicStatuses = findAllDestinationValuesUsingRegexMatching(epics, statusMap, 'status');
 
   return epics.map((epic: CommonEpicModel, epicIndex: number) => ({
     status: epicStatuses[epicIndex],
-    key: generateEpicId(parseInt(epic?.id?.toString() || '0', 10)),
+    key: generateEpicId(parseInt(epic?.id?.toString() || '0', 10), projectId),
     issueType: 'Epic',
     created: epic.created,
     updated: epic.updated,
@@ -151,7 +143,7 @@ function trimmedSummary(summary: string) {
   // return summary.split('\n')[0].replace(regexToFindTheLastSpaceBeforeTheLimitForSummaryAndTrimAllCharactersBeyondIt, '$1');
 }
 
-async function mapTasks(stories: CommonStoryModelItem[], users: any[]): Promise<any | string> {
+async function mapTasks(stories: CommonStoryModelItem[], users: any[], projectId: string): Promise<any | string> {
   return stories.flatMap((story: CommonStoryModelItem) => story.tasks.map((task: CommonTaskModelItem) => ({ story, task })))
     .map(({ task, story }) => ({
       status: task.complete ? 'Done' : 'To Do',
@@ -162,12 +154,12 @@ async function mapTasks(stories: CommonStoryModelItem[], users: any[]): Promise<
       summary: trimmedSummary(task.name),
       description: task.description,
       externalId: task.id?.toString(),
-      key: generateTaskId(parseInt(task?.id?.toString() || '0', 10)),
+      key: generateTaskId(parseInt(task?.id?.toString() || '0', 10), projectId),
       components: story.components,
     }));
 }
 
-function linkSubtasksToParents(data: CommonStoryModel): any[] {
+function linkSubtasksToParents(data: CommonModel): any[] {
   return data.stories.flatMap((story: CommonStoryModelItem) => story.tasks.map((task: CommonTaskModelItem) => ({
     sourceId: task.id?.toString(),
     destinationId: story.externalId?.toString(),
@@ -175,38 +167,37 @@ function linkSubtasksToParents(data: CommonStoryModel): any[] {
   })));
 }
 
-export default class {
-  static async from(/* data: any */): Promise<CommonStoryModel> {
-    throw new Error('Not implemented');
+export default class implements DestinationMapper<any> {
+  private jiraBoardId: number;
+
+  constructor(private toJIRAStatusMap: Record<string, string>, private toJIRATypeMap: Record<string, string>, private projectId: string, boardId?: number) {
+    if (Number.isNaN(boardId) || !boardId || boardId < 1) {
+      throw new Error('Could not set Rapid View ID. Ensure destination.boardId is set to an integer value.');
+    }
+    this.jiraBoardId = boardId;
   }
 
-  static async to(data: CommonStoryModel): Promise<any | string> {
+  get statusMap(): Record<string, string> {
+    return this.toJIRAStatusMap;
+  }
+
+  async to(data: CommonModel): Promise<any | string> {
     const users: any[] = await getUsers();
-    const epics: any[] = await mapEpics(data.epics, users);
-    const issues: any[] = await mapIssues(data.stories, data.epics, data.sprints, users);
-    const tasks: any[] = await mapTasks(data.stories, users);
+    const epics: any[] = await mapEpics(data.epics, users, this.toJIRAStatusMap, this.projectId);
+    const issues: any[] = await mapIssues(data.stories, data.epics, data.sprints, users, this.toJIRAStatusMap, this.toJIRATypeMap, this.projectId, this.jiraBoardId);
+    const tasks: any[] = await mapTasks(data.stories, users, this.projectId);
 
     return {
       links: linkSubtasksToParents(data),
       projects: [{
-        id: process.env.PRODUCER_BOARD_ID,
+        id: this.projectId,
         name: data.project.name,
-        key: process.env.PRODUCER_BOARD_ID,
+        key: this.projectId,
         description: fixLinks(data.project.description),
         type: 'software',
         issues: epics.concat(issues.concat(tasks)),
         components: data.project.components,
       }],
-      /*
-      // Hack; if JIRA bulk upload doesn't support sprint import
-      // Use to generate curls to create sprints in advance
-      sprints: data.sprints.map((sprint: CommonSprintModel) => ({
-        'startDate': sprint.start,
-        'name': sprint.name,
-        'endDate': sprint.end,
-        'originBoardId': process.env.PRODUCER_BOARD_ID,
-      })),
-      */
     };
   }
 }

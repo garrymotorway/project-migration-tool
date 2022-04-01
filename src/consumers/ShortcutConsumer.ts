@@ -7,14 +7,16 @@ const sleep = require('await-sleep');
 const SHORT_SLEEP_TIME_TO_AVOID_SPAMMING_SOURCE_API_MS = 50;
 
 export default class ShortcutConsumer implements Consumer {
+  constructor(private projectId: string) {}
+
   async consume(): Promise<any> {
-    const groupStoriesResponse = await axios.get(`https://api.app.shortcut.com/api/v3/groups/${process.env.CONSUMER_BOARD_ID}/stories`, {
+    const groupStoriesResponse = await axios.get(`https://api.app.shortcut.com/api/v3/groups/${this.projectId}/stories`, {
       headers: {
         'Shortcut-Token': `${process.env.CONSUMER_TOKEN}`,
       },
     });
 
-    const groupResponse = await axios.get(`https://api.app.shortcut.com/api/v3/groups/${process.env.CONSUMER_BOARD_ID}`, {
+    const groupResponse = await axios.get(`https://api.app.shortcut.com/api/v3/groups/${this.projectId}`, {
       headers: {
         'Shortcut-Token': `${process.env.CONSUMER_TOKEN}`,
       },
