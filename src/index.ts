@@ -1,5 +1,4 @@
-import 'module-alias/register';
-
+import './module-alias-config';
 import { Config } from '@models/Config';
 import Orchestrator from './Orchestrator';
 
