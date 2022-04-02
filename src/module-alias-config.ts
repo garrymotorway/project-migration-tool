@@ -1,4 +1,5 @@
 import 'module-alias/register';
-import moduleAlias from 'module-alias';
+
+const moduleAlias = require('module-alias');
 
 moduleAlias(`${__dirname}/../package.json`);
