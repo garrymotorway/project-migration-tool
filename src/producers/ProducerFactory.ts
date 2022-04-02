@@ -1,5 +1,5 @@
 import JIRAProducer from '@producers/JIRAProducer';
-import Producer from './Producer';
+import Producer from '@producers/Producer';
 
 const { JIRA } = require('@enums/ProjectManagementSystems');
 

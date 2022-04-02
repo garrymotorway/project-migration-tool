@@ -1,7 +1,7 @@
 import 'module-alias/register';
 
-import Orchestrator from '@/Orchestrator';
-import { Config } from './models/Config';
+import { Config } from '@models/Config';
+import Orchestrator from './Orchestrator';
 
 export default async function run(config: Config) {
   if (!config.source.projectId) {

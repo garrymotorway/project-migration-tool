@@ -1,8 +1,8 @@
 import {
   ShortcutCommentModel, ShortcutEpicModel, ShortcutIterationModel, ShortcutLabelModel, ShortcutMemberModel, ShortcutModel, ShortcutProjectsModel, ShortcutStoryModel, ShortcutTaskModel, ShortcutWorkflowModel, ShortcutWorkflowStateModel,
-} from '@/models/ShortcutModels';
+} from '@models/ShortcutModels';
 import { CommonCommentsModelItem, CommonEpicModel, CommonModel } from '@models/CommonModels';
-import { SourceMapper } from './Mapper';
+import { SourceMapper } from '@mappers/Mapper';
 
 function getMemberEmailAddressById(members: ShortcutMemberModel[], id: string): string {
   return members.find((member: ShortcutMemberModel) => member.id === id)?.profile.email_address || id;

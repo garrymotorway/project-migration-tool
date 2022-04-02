@@ -1,7 +1,7 @@
 import MapperFactory from '@mappers/MapperFactory';
 import { ShortcutMapper } from '@mappers/ShortcutMapper';
 import JIRAMapper from '@mappers/JIRAMapper';
-import { CommonModel } from '@/models/CommonModels';
+import { CommonModel } from '@models/CommonModels';
 
 const config = require('../../__tests__/data/config-example.json');
 

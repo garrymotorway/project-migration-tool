@@ -3,7 +3,7 @@ import {
 } from '@models/CommonModels';
 import findAllDestinationValuesUsingRegexMatching from '@mappers/RegexMapperUtils';
 import axios from 'axios';
-import { DestinationMapper } from './Mapper';
+import { DestinationMapper } from '@mappers/Mapper';
 
 // Ensure [text](url) links are JIRA-formatted
 // Images are replaced with links

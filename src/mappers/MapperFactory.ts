@@ -1,9 +1,9 @@
-import { ShortcutMapper } from '@/mappers/ShortcutMapper';
+import { ShortcutMapper } from '@mappers/ShortcutMapper';
 import { DestinationMapper, Mapper, SourceMapper } from '@mappers/Mapper';
 import { SHORTCUT, JIRA } from '@enums/ProjectManagementSystems';
-import { ShortcutModel } from '@/models/ShortcutModels';
-import { Config } from '@/models/Config';
-import JIRAMapper from './JIRAMapper';
+import { ShortcutModel } from '@models/ShortcutModels';
+import { Config } from '@models/Config';
+import JIRAMapper from '@mappers/JIRAMapper';
 
 function getSourceMapper(config: Config): SourceMapper<ShortcutModel> {
   if (config.source.name.toLowerCase() === SHORTCUT.toLowerCase()) {

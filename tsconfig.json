@@ -12,9 +12,6 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "paths": {
-      "@/*": [
-        "*"
-      ],
       "@consumers/*": [
         "consumers/*"
       ],

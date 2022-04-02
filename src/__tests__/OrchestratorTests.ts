@@ -1,4 +1,4 @@
-import Orchestrator from '@/Orchestrator';
+import Orchestrator from '../Orchestrator';
 
 const { SHORTCUT, JIRA } = require('@enums/ProjectManagementSystems');
 
