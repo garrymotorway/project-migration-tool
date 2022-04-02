@@ -7,7 +7,8 @@
     "test": "CONSUMER_TOKEN=he3l0 PRODUCER_TOKEN=aby3 jest",
     "build": "rm -rf dist && tsc -p tsconfig-build.json",
     "start": "npm run build && node ./run-test.js",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "postinstall": "npm run build"
   },
   "repository": {
     "type": "git",
