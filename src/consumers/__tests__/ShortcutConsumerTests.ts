@@ -1,13 +1,19 @@
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import Consumer from '@consumers/Consumer';
 import ShortcutConsumer from '@consumers/ShortcutConsumer';
 
 const projectId = '123';
 
 jest.mock('axios');
-(axios.get as unknown as jest.Mock).mockImplementation(async (url: string) => {
+(axios.get as unknown as jest.Mock).mockImplementation(async (url: string, requestConfig: AxiosRequestConfig) => {
   if (url === `https://api.app.shortcut.com/api/v3/groups/${projectId}/stories`) {
-    return { data: [{ id: 1 }, { id: 2 }, { id: 3 }] };
+    if (requestConfig.data?.offset === 0) {
+      return { data: [{ id: 1 }, { id: 2 }] };
+    }
+    if (requestConfig.data?.offset === 2) {
+      return { data: [{ id: 3 }] };
+    }
+    return { data: [] };
   }
 
   if (url === `https://api.app.shortcut.com/api/v3/groups/${projectId}`) {
@@ -81,7 +87,9 @@ jest.mock('axios');
   throw new Error(`No mock for URL ${url}`);
 });
 
-const consumer: Consumer = new ShortcutConsumer(projectId);
+const consumer: Consumer = new ShortcutConsumer({
+  projectId, maxResults: 10000, batchSize: 2, name: 'shortcut',
+});
 
 test('gets a list of stories from Shortcut', async () => {
   const dataFromShortcut = await consumer.consume();

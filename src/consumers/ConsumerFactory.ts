@@ -2,14 +2,15 @@ import Consumer from '@consumers/Consumer';
 import ShortcutConsumer from '@consumers/ShortcutConsumer';
 
 import { SHORTCUT } from '@enums/ProjectManagementSystems';
+import { SourceConfig } from '@models/Config';
 
 export default class ConsumerFactory {
-  static create(consumerName: string, projectId: string): Consumer {
-    switch (consumerName?.toLowerCase()) {
+  static create(config: SourceConfig): Consumer {
+    switch (config.name?.toLowerCase()) {
       case SHORTCUT:
-        return new ShortcutConsumer(projectId);
+        return new ShortcutConsumer(config);
       default:
-        throw new Error(`The consumer ${consumerName} is not valid.`);
+        throw new Error(`The consumer ${config.name} is not valid.`);
     }
   }
 }

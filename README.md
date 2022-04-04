@@ -38,7 +38,9 @@ The config provides all the information needed to map from a source to a destina
 {
     "source": {
         "name": "shortcut",
-        "projectId": "abddsd343782ihds7c"
+        "projectId": "abddsd343782ihds7c",
+        "maxResults": 100000, // optional - defaults to 100,000 if not provided
+        "batchSize": 1000 // optional - defaults to 1,000 if not provided
     },
     "destination": {
         "name": "jira",

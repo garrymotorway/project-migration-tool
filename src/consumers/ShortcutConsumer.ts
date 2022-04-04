@@ -1,22 +1,47 @@
 import Consumer from '@consumers/Consumer';
+import { SourceConfig } from '@models/Config';
 
 const axios = require('axios');
 
 const sleep = require('await-sleep');
 
 const SHORT_SLEEP_TIME_TO_AVOID_SPAMMING_SOURCE_API_MS = 50;
+const MAX_RESULTS_DEFAULT = 100000;
+const BATCH_LIMIT_DEFAULT = 1000;
 
-export default class ShortcutConsumer implements Consumer {
-  constructor(private projectId: string) {}
-
-  async consume(): Promise<any> {
-    const groupStoriesResponse = await axios.get(`https://api.app.shortcut.com/api/v3/groups/${this.projectId}/stories`, {
+async function getGroupStories(config: SourceConfig) {
+  const groupStoriesResponse: { data: any[] } = { data: [] };
+  const maxResults = config.maxResults || MAX_RESULTS_DEFAULT;
+  const batchSize = config.batchSize || BATCH_LIMIT_DEFAULT;
+  let offset = 0;
+  while (offset < maxResults) {
+    /* eslint-disable no-await-in-loop */
+    const thisGroupStoriesResponse: { data: any[] } = await axios.get(`https://api.app.shortcut.com/api/v3/groups/${config.projectId}/stories`, {
       headers: {
         'Shortcut-Token': `${process.env.CONSUMER_TOKEN}`,
       },
+      data: {
+        limit: config.batchSize || batchSize,
+        offset,
+      },
     });
+    if (!thisGroupStoriesResponse.data?.length) {
+      break;
+    }
 
-    const groupResponse = await axios.get(`https://api.app.shortcut.com/api/v3/groups/${this.projectId}`, {
+    groupStoriesResponse.data.push(...thisGroupStoriesResponse.data);
+    offset += batchSize;
+  }
+  return groupStoriesResponse;
+}
+
+export default class ShortcutConsumer implements Consumer {
+  constructor(private config: SourceConfig) {}
+
+  async consume(): Promise<any> {
+    const groupStoriesResponse = await getGroupStories(this.config);
+
+    const groupResponse = await axios.get(`https://api.app.shortcut.com/api/v3/groups/${this.config.projectId}`, {
       headers: {
         'Shortcut-Token': `${process.env.CONSUMER_TOKEN}`,
       },

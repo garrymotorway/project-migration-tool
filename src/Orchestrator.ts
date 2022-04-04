@@ -16,8 +16,8 @@ export default class Orchestrator {
 
   constructor(config: Config) {
     this.mapper = MapperFactory.create(config);
-    this.consumer = ConsumerFactory.create(config.source.name, config.source.projectId);
-    this.producer = ProducerFactory.create(config.destination.name);
+    this.consumer = ConsumerFactory.create(config.source);
+    this.producer = ProducerFactory.create(config.destination);
   }
 
   async run() {
