@@ -196,7 +196,7 @@ describe('Tasks', () => {
       key: generateTaskId(+(data.stories[0].tasks[0].id || 0), 'HOTT'),
     });
     expect(link).toEqual({
-      name: data.stories[0].tasks[0].description.split('\n')[0],
+      name: 'sub-task-link',
       sourceId: data.stories[0].tasks[0].id?.toString(),
       destinationId: data.stories[0].externalId,
     });

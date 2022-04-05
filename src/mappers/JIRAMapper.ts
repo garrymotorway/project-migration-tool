@@ -142,8 +142,6 @@ async function mapEpics(epics: CommonEpicModel[], users: any[], statusMap: Recor
 const MAX_SUMMARY_LENGTH = 255;
 function trimmedSummary(summary: string) {
   return summary.split('\n')[0].replace(new RegExp(`(?<=.{${MAX_SUMMARY_LENGTH - 3},${MAX_SUMMARY_LENGTH - 3}}).*`, ''), '...').replace(/\s+...$/, '...');
-  // const regexToFindTheLastSpaceBeforeTheLimitForSummaryAndTrimAllCharactersBeyondIt = new RegExp(`(.{${MAX_SUMMARY_LENGTH},${MAX_SUMMARY_LENGTH}}(?=\\s)|.{1,${MAX_SUMMARY_LENGTH}}(?=\\s)).*`);
-  // return summary.split('\n')[0].replace(regexToFindTheLastSpaceBeforeTheLimitForSummaryAndTrimAllCharactersBeyondIt, '$1');
 }
 
 export async function mapTasks(stories: CommonStoryModelItem[], users: any[], projectId: string): Promise<any[]> {
@@ -166,7 +164,7 @@ function linkSubtasksToParents(data: CommonModel): any[] {
   return data.stories.flatMap((story: CommonStoryModelItem) => story.tasks.map((task: CommonTaskModelItem) => ({
     sourceId: task.id?.toString(),
     destinationId: story.externalId?.toString(),
-    name: trimmedSummary(task.description),
+    name: 'sub-task-link',
   })));
 }
 
