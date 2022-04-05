@@ -160,8 +160,8 @@ export async function mapTasks(stories: CommonStoryModelItem[], users: any[], pr
     }));
 }
 
-function linkSubtasksToParents(data: CommonModel): any[] {
-  return data.stories.flatMap((story: CommonStoryModelItem) => story.tasks.map((task: CommonTaskModelItem) => ({
+export function linkSubtasksToParents(stories: CommonStoryModelItem[]): any[] {
+  return stories.flatMap((story: CommonStoryModelItem) => story.tasks.filter((task: CommonTaskModelItem) => task.name).map((task: CommonTaskModelItem) => ({
     sourceId: task.id?.toString(),
     destinationId: story.externalId?.toString(),
     name: 'sub-task-link',
@@ -189,7 +189,7 @@ export default class implements DestinationMapper<any> {
     const tasks: any[] = await mapTasks(data.stories, users, this.projectId);
 
     return {
-      links: linkSubtasksToParents(data),
+      links: linkSubtasksToParents(data.stories),
       projects: [{
         id: this.projectId,
         name: data.project.name,

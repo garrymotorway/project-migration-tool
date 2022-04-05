@@ -1,5 +1,5 @@
 import JIRAMapper, {
-  getSprintStatus, generateEpicId, mapTasks, generateIssueId, generateTaskId,
+  getSprintStatus, generateEpicId, mapTasks, generateIssueId, generateTaskId, linkSubtasksToParents,
 } from '@mappers/JIRAMapper';
 import { CommonModel, CommonSprintModel, CommonStoryModelItem } from '@models/CommonModels';
 import axios, { AxiosRequestConfig } from 'axios';
@@ -205,6 +205,11 @@ describe('Tasks', () => {
   test('Ignores tasks with blank names', async () => {
     storyWithTasks.tasks[0].name = '';
     expect(await mapTasks([storyWithTasks], [], 'HABC')).toHaveLength(0);
+  });
+
+  test('Doesn\'t link tasks with blank names', async () => {
+    storyWithTasks.tasks[0].name = '';
+    expect(await linkSubtasksToParents([storyWithTasks])).toHaveLength(0);
   });
 });
 
