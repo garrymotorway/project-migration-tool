@@ -1,6 +1,7 @@
 import {
   CommonCommentsModelItem, CommonEpicModel, CommonSprintModel, CommonModel, CommonStoryModelItem, CommonTaskModelItem,
 } from '@models/CommonModels';
+import { getDestSeed } from '@mappers/SeedUtils';
 import findAllDestinationValuesUsingRegexMatching from '@mappers/RegexMapperUtils';
 import axios from 'axios';
 import { DestinationMapper } from '@mappers/Mapper';
@@ -10,17 +11,19 @@ import { DestinationMapper } from '@mappers/Mapper';
 function fixLinks(text: string) {
   return text?.replace(/!?\[([^\]]+)\]\(([^)]+)\)/ig, '[$1|$2]');
 }
-
+const EPIC_OFFSET = 50000;
 export function generateEpicId(epicIndex: number, projectId: string) {
-  return `${projectId}-${epicIndex + parseInt(process.env.DEST_SEED || '1000000', 10) + 50000}`;
+  return `${projectId}-${epicIndex + getDestSeed() + EPIC_OFFSET}`;
 }
 
+const ISSUE_OFFSET = 100000;
 export function generateIssueId(issueIndex: number, projectId: string) {
-  return `${projectId}-${issueIndex + parseInt(process.env.DEST_SEED || '1000000', 10) + 100000}`;
+  return `${projectId}-${issueIndex + getDestSeed() + ISSUE_OFFSET}`;
 }
 
+const TASK_OFFSET = 200000;
 export function generateTaskId(issueIndex: number, projectId: string) {
-  return `${projectId}-${issueIndex + parseInt(process.env.DEST_SEED || '1000000', 10) + 200000}`;
+  return `${projectId}-${issueIndex + getDestSeed() + TASK_OFFSET}`;
 }
 
 export function getSprintStatus(sprint: CommonSprintModel) {

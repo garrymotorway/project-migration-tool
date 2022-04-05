@@ -1,8 +1,11 @@
-import JIRAMapper, { getSprintStatus, generateEpicId, mapTasks } from '@mappers/JIRAMapper';
+import JIRAMapper, {
+  getSprintStatus, generateEpicId, mapTasks, generateIssueId, generateTaskId,
+} from '@mappers/JIRAMapper';
 import { CommonModel, CommonSprintModel, CommonStoryModelItem } from '@models/CommonModels';
 import axios, { AxiosRequestConfig } from 'axios';
 
 jest.mock('axios');
+jest.mock('@mappers/SeedUtils', () => ({ getDestSeed: () => 100000 }));
 
 const projectId = 'HOTT';
 const boardId = 99;
@@ -190,7 +193,7 @@ describe('Tasks', () => {
       updated: data.stories[0].tasks[0].updated,
       externalId: data.stories[0].tasks[0].id?.toString(),
       components: data.stories[0].components,
-      key: 'HOTT-1201234',
+      key: generateTaskId(+(data.stories[0].tasks[0].id || 0), 'HOTT'),
     });
     expect(link).toEqual({
       name: data.stories[0].tasks[0].description.split('\n')[0],
@@ -284,5 +287,27 @@ describe('Sprint statuses', () => {
   test('ACTIVE if now is within start and end', () => {
     Object.assign(sprint, { start: '1800-01-01', end: '2500-01-01' });
     expect(getSprintStatus(sprint)).toEqual('ACTIVE');
+  });
+});
+
+describe('getDestSeed', () => {
+  test('Generates epic ID', () => {
+    const seed = generateEpicId(1, 'HOT');
+    expect(seed).toEqual('HOT-150001');
+  });
+
+  test('Generates issue ID', () => {
+    const seed = generateIssueId(1, 'HOT');
+    expect(seed).toEqual('HOT-200001');
+  });
+
+  test('Generates task ID', () => {
+    const seed = generateTaskId(1, 'HOT');
+    expect(seed).toEqual('HOT-300001');
+  });
+
+  test('Generates epic ID', () => {
+    const seed = generateEpicId(1, 'HOT');
+    expect(seed).toEqual('HOT-150001');
   });
 });
