@@ -37,15 +37,33 @@ export function getSprintStatus(sprint: CommonSprintModel) {
 }
 
 async function getUsers() : Promise<any[]> {
-  return (await axios.get('https://motorway.atlassian.net/rest/api/3/users/search?&includeInactive=true', {
-    headers: {
-      'Authorization': `Basic ${process.env.PRODUCER_TOKEN}`,
-    },
-  })).data;
+  const result : any[] = [];
+  const maxResults = 10000;
+  const batchSize = 50;
+  let offset = 0;
+  while (offset < maxResults) {
+    /* eslint-disable no-await-in-loop */
+    const thisUserListResponse: { data: any[] } = await axios.get(`https://motorway.atlassian.net/rest/api/3/users/search?&includeInactive=true&startAt=${offset}&maxResults=${batchSize}`, {
+      headers: {
+        'Authorization': `Basic ${process.env.PRODUCER_TOKEN}`,
+      },
+    });
+    if (!thisUserListResponse.data?.length) {
+      break;
+    }
+
+    result.push(...thisUserListResponse.data);
+    offset += batchSize;
+  }
+  return result;
 }
 
-function emailToJiraAccountId(users: any[], email: string) {
-  const locatedUser = users.find((user: any) => user.emailAddress === email) || users.find((user: any) => user.emailAddress === process.env.DEFAULT_REPORTER);
+export function emailToJiraAccountId(users: any[], email: string) {
+  const locatedUser = users.find((user: any) => user.emailAddress === email)
+    || users.find((user: any) => user.emailAddress === process.env.DEFAULT_REPORTER);
+  if (!locatedUser) {
+    throw new Error(`Failed to find the user for email ${email}, and the default user ${process.env.DEFAULT_REPORTER ? `(${process.env.DEFAULT_REPORTER})` : ''} either doesn't exist in JIRA or wasn't provided.`);
+  }
   return (locatedUser && locatedUser.accountId) || email;
 }
 

@@ -1,5 +1,5 @@
 import JIRAMapper, {
-  getSprintStatus, generateEpicId, mapTasks, generateIssueId, generateTaskId, linkSubtasksToParents,
+  getSprintStatus, generateEpicId, mapTasks, generateIssueId, generateTaskId, linkSubtasksToParents, emailToJiraAccountId,
 } from '@mappers/JIRAMapper';
 import { CommonModel, CommonSprintModel, CommonStoryModelItem } from '@models/CommonModels';
 import axios, { AxiosRequestConfig } from 'axios';
@@ -14,13 +14,24 @@ const boardId = 99;
   if (requestConfig.headers?.Authorization !== `Basic ${process.env.PRODUCER_TOKEN}`) {
     throw new Error('Mock threw simulated 401. Token not provided in request');
   }
-  if (url === 'https://motorway.atlassian.net/rest/api/3/users/search?&includeInactive=true') {
+  if (url === 'https://motorway.atlassian.net/rest/api/3/users/search?&includeInactive=true&startAt=0&maxResults=50') {
     return {
       data: [
         { emailAddress: 'luke.skywalker@motorway.co.uk', accountId: 'abc123' },
         { emailAddress: 'john.doe@motorway.co.uk', accountId: 'abc456' },
       ],
     };
+  }
+  if (url === 'https://motorway.atlassian.net/rest/api/3/users/search?&includeInactive=true&startAt=50&maxResults=50') {
+    return {
+      data: [
+        { emailAddress: 'mary.jane@motorway.co.uk', accountId: 'mj123' },
+        { emailAddress: 'default@motorway.co.uk', accountId: '123' },
+      ],
+    };
+  }
+  if (url === 'https://motorway.atlassian.net/rest/api/3/users/search?&includeInactive=true&startAt=100&maxResults=50') {
+    return { data: [] };
   }
 
   throw new Error(`No mock for URL ${url}`);
@@ -41,7 +52,7 @@ const data: CommonModel = {
     ],
     updated: '2022-03-22T09:19:57Z',
     created: '2022-03-21T09:19:57Z',
-    reporter: 'John Smith',
+    reporter: 'mary.jane@motorway.co.uk',
     type: 'chore',
     estimate: 5,
     labels: ['mvp'],
@@ -151,7 +162,7 @@ test('Maps story external ID to issue external ID', () => {
 });
 
 test('Maps story reporter', () => {
-  expect(story.reporter).toEqual(data.stories[0].reporter);
+  expect(story.reporter).toEqual('mj123');
 });
 
 test('Maps story status', () => {
@@ -315,4 +326,16 @@ describe('getDestSeed', () => {
     const seed = generateEpicId(1, 'HOT');
     expect(seed).toEqual('HOT-150001');
   });
+});
+
+describe('getUsers', () => {
+  test('gets email when email exists in JIRA', () => expect(emailToJiraAccountId([
+    { emailAddress: 'garry@email.com', accountId: '123' },
+    { emailAddress: 'default@motorway.co.uk', accountId: '456' },
+  ], 'garry@email.com')).toEqual('123'));
+
+  test('uses default email when email does not exist in JIRA', () => expect(emailToJiraAccountId([
+    { emailAddress: 'fred@email.com', accountId: '123' },
+    { emailAddress: 'default@motorway.co.uk', accountId: '456' },
+  ], 'garry@email.com')).toEqual('456'));
 });
