@@ -59,12 +59,12 @@ async function getUsers() : Promise<any[]> {
 }
 
 export function emailToJiraAccountId(users: any[], email: string) {
-  const locatedUser = users.find((user: any) => user.emailAddress === email)
+  const locatedUser = users.find((user: any) => user.emailAddress && user.emailAddress === email)
     || users.find((user: any) => user.emailAddress === process.env.DEFAULT_REPORTER);
   if (!locatedUser) {
     throw new Error(`Failed to find the user for email ${email}, and the default user ${process.env.DEFAULT_REPORTER ? `(${process.env.DEFAULT_REPORTER})` : ''} either doesn't exist in JIRA or wasn't provided.`);
   }
-  return (locatedUser && locatedUser.accountId) || email;
+  return locatedUser.accountId;
 }
 
 function buildCustomFieldValues(story: CommonStoryModelItem, epics: CommonEpicModel[], sprints: CommonSprintModel[], projectId: string, rapidViewId: number) {
