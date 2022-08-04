@@ -9,6 +9,14 @@ const SHORT_SLEEP_TIME_TO_AVOID_SPAMMING_SOURCE_API_MS = 50;
 const MAX_RESULTS_DEFAULT = 100000;
 const BATCH_LIMIT_DEFAULT = 1000;
 
+async function getAllGroups() {
+  return axios.get('https://api.app.shortcut.com/api/v3/groups', {
+    headers: {
+      'Shortcut-Token': `${process.env.CONSUMER_TOKEN}`,
+    },
+  });
+}
+
 async function getGroupStories(config: SourceConfig) {
   const groupStoriesResponse: { data: any[] } = { data: [] };
   const maxResults = config.maxResults || MAX_RESULTS_DEFAULT;
@@ -39,13 +47,30 @@ export default class ShortcutConsumer implements Consumer {
   constructor(private config: SourceConfig) {}
 
   async consume(): Promise<any> {
-    const groupStoriesResponse = await getGroupStories(this.config);
-
-    const groupResponse = await axios.get(`https://api.app.shortcut.com/api/v3/groups/${this.config.projectId}`, {
-      headers: {
-        'Shortcut-Token': `${process.env.CONSUMER_TOKEN}`,
-      },
+    const workflowId = 500048563;
+    let groups = await getAllGroups();
+    groups = groups.filter((g: any) => g.workflow_ids.includes((wfid: number) => wfid === workflowId));
+    const theseStoriesPromises = groups.map((group: any) => {
+      const config = { ...this.config, projectId: group.id };
+      return getGroupStories(config);
     });
+    const groupStoriesResponse = {
+      data: (await Promise.all(theseStoriesPromises)).flatMap((s: any) => s.data),
+    };
+
+    // groups.array.forEach((group) => {
+    //   const config = { ...this.config, projectId: group.id };
+    //   const thisGroupStoriesResponse = await getGroupStories(config);
+    //   const theseStories = thisGroupStoriesResponse.data;
+    //   this.groupStoriesResponse.data.push(...theseStories);
+    // });
+
+    // const groupsResponse = 
+    // const groupResponse = await axios.get(`https://api.app.shortcut.com/api/v3/groups/${this.config.projectId}`, {
+    //   headers: {
+    //     'Shortcut-Token': `${process.env.CONSUMER_TOKEN}`,
+    //   },
+    // });
 
     const members = await axios.get('https://api.app.shortcut.com/api/v3/members', {
       headers: {
@@ -91,7 +116,7 @@ export default class ShortcutConsumer implements Consumer {
 
     return {
       stories,
-      group: groupResponse.data,
+      groups,
       members: members.data,
       workflows: workflows.data,
       epics: epics.data,

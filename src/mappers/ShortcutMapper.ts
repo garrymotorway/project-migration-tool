@@ -100,8 +100,8 @@ export class ShortcutMapper implements SourceMapper<ShortcutModel> {
         components: getComponents([story.project_id], data.projects),
       })),
       project: {
-        name: data.group.name,
-        description: cleanText(data.group.description) || '',
+        name: 'Visual design',
+        description: 'Visual design board',
         components: data.projects.map((project: ShortcutProjectsModel) => project.name),
       },
       sprints: (Array.from(new Set(data.stories
